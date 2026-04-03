@@ -1,0 +1,22 @@
+{
+  "name": "@holiday-calendar/core",
+  "version": "0.0.1",
+  "description": "Core API for the Holiday Calendar library",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --build --noEmit"
+  },
+  "license": "LGPL-2.1",
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.4.4"
+  }
+}
