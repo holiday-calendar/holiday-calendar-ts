@@ -1,2 +1,126 @@
-# holiday-calendar-js
-A library for definition and calculation of holiday calendars.
+# Holiday Calendar (TypeScript)
+
+[![CI](https://github.com/holiday-calendar/holiday-calendar-ts/actions/workflows/ci.yml/badge.svg)](https://github.com/holiday-calendar/holiday-calendar-ts/actions/workflows/ci.yml)
+[![License: LGPL v2.1](https://img.shields.io/badge/License-LGPL_v2.1-blue.svg)](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)
+
+A TypeScript library for defining and calculating holiday calendars. Provides an extensible foundation for generating the calendars used to determine when holidays occur and when they are observed worldwide.
+
+## About
+
+Holiday Calendar (TypeScript) answers a common need in financial, scheduling, and business applications: _"Is this date a business day?"_ and _"When is this holiday observed this year?"_
+
+Key design goals:
+
+- **Correct date rolling** — when a holiday falls on a weekend, the library applies configurable rolling rules (e.g. following Monday, previous Friday) to compute the observed date.
+- **Extensible by design** — new regional calendars are added by implementing `HolidayCalendarProvider` and registering it explicitly, enabling full tree-shaking of unused calendars.
+- **Modern TypeScript** — built on TypeScript 5 with strict mode, using discriminated unions and the [Temporal API](https://tc39.es/proposal-temporal/) (via `@js-temporal/polyfill`).
+
+### Supported Calendars
+
+| Code | Region |
+|------|--------|
+| `US` | United States National Holidays |
+
+## Installation
+
+Holiday Calendar requires **Node.js 22** or higher. The packages are published to the GitHub Packages npm registry.
+
+Add the registry to your `.npmrc`:
+
+```
+@holiday-calendar:registry=https://npm.pkg.github.com
+```
+
+Then install the packages you need:
+
+```bash
+# Core API (required)
+npm install @holiday-calendar/core
+
+# Western calendars: US
+npm install @holiday-calendar/western
+```
+
+## Usage
+
+### Look up a calendar and calculate holidays for a year
+
+```typescript
+import { createRegistry } from '@holiday-calendar/core';
+import { usProvider } from '@holiday-calendar/western';
+
+const registry = createRegistry(usProvider);
+
+// Get the US holiday calendar
+const usCalendar = registry.get('US');
+
+// Calculate observed holiday dates for 2025
+const holidays = usCalendar.calculate(2025);
+holidays.forEach(({ date, holiday }) =>
+  console.log(`${date}  ${holiday.name}`)
+);
+```
+
+### Check if a date is a weekend
+
+```typescript
+import { Temporal } from '@holiday-calendar/core';
+
+const today = Temporal.Now.plainDateISO();
+const isWeekend = usCalendar.isWeekend(today);
+```
+
+### Merge two calendars
+
+```typescript
+const ukCalendar = registry.get('UK');
+const combined = usCalendar.merge(ukCalendar);
+const combined2025 = combined.calculate(2025);
+```
+
+### List all registered calendar codes
+
+```typescript
+const codes = registry.codes();
+// ["US"]
+```
+
+### Define a custom holiday calendar
+
+Implement `HolidayCalendarProvider`, create your `HolidayCalendar`, and register it with the registry:
+
+```typescript
+import {
+  HolidayCalendar,
+  HolidayCalendarProvider,
+  DateRolls,
+  fixedHoliday,
+} from '@holiday-calendar/core';
+
+const jpProvider: HolidayCalendarProvider = {
+  code: 'JP',
+  region: 'Japan National Holidays',
+  getCalendar(): HolidayCalendar {
+    return new HolidayCalendar({
+      code: 'JP',
+      name: 'Japan National Holidays',
+      dateRoll: DateRolls.followingMonday(),
+      holidays: [
+        fixedHoliday({ name: "New Year's Day", month: 1, day: 1 }),
+        // ... additional holidays
+      ],
+    });
+  },
+};
+
+const registry = createRegistry(jpProvider);
+const jpCalendar = registry.get('JP');
+```
+
+## Contributing
+
+Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md) before opening an issue or pull request. This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md) — all participants are expected to uphold it.
+
+## License
+
+Holiday Calendar is released under the [GNU Lesser General Public License, version 2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html).
