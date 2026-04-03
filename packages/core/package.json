@@ -12,8 +12,8 @@
     }
   },
   "scripts": {
-    "build": "tsc --build",
-    "typecheck": "tsc --build --noEmit"
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
   },
   "license": "LGPL-2.1",
   "dependencies": {
