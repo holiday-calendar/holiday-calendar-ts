@@ -1,0 +1,22 @@
+{
+  "name": "@holiday-calendar/western",
+  "version": "0.0.1",
+  "description": "Western regional holiday calendars for the Holiday Calendar library",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "LGPL-2.1",
+  "dependencies": {
+    "@holiday-calendar/core": "workspace:*"
+  }
+}
