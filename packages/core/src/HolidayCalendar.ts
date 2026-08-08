@@ -49,7 +49,8 @@ export class HolidayCalendar {
     for (const holiday of this.holidays) {
       const raw = dateForYear(holiday, year);
       if (raw === null) continue;
-      const date = holiday.rollable ? this.dateRoll(raw) : raw;
+      const rollable = 'rollable' in holiday && holiday.rollable;
+      const date = rollable ? this.dateRoll(raw) : raw;
       results.push({ holiday, date });
     }
     return results.sort((a, b) => Temporal.PlainDate.compare(a.date, b.date));

@@ -40,10 +40,27 @@ export interface SpecialAnniversary {
 }
 
 /**
- * A discriminated union of all holiday types.
+ * A day the exchange stays open but closes early (e.g. day after
+ * Thanksgiving, Christmas Eve). Never weekend-rolled — there is no
+ * `rollable` field. closeTime/timeZoneId are always the exchange's own
+ * local time; never normalize to UTC.
+ * Equivalent to Java's EarlyCloseHoliday.
+ */
+export interface EarlyCloseHoliday {
+  readonly type: 'earlyClose';
+  readonly name: string;
+  readonly description?: string;
+  readonly observance: Observance;
+  readonly closeTime: Temporal.PlainTime;
+  readonly timeZoneId: string; // IANA zone id, e.g. "America/New_York"
+}
+
+/**
+ * A discriminated union of all holiday types: FixedHoliday, FloatingHoliday,
+ * SpecialAnniversary, and EarlyCloseHoliday.
  * Equivalent to Java's sealed Holiday interface.
  */
-export type Holiday = FixedHoliday | FloatingHoliday | SpecialAnniversary;
+export type Holiday = FixedHoliday | FloatingHoliday | SpecialAnniversary | EarlyCloseHoliday;
 
 /** Creates a FixedHoliday. Defaults rollable to true. */
 export function fixedHoliday(opts: {
@@ -79,6 +96,17 @@ export function specialAnniversary(opts: {
   return { type: 'anniversary', rollable, ...rest };
 }
 
+/** Creates an EarlyCloseHoliday. There is no `rollable` option — early closes are never weekend-rolled. */
+export function earlyCloseHoliday(opts: {
+  name: string;
+  description?: string;
+  observance: Observance;
+  closeTime: Temporal.PlainTime;
+  timeZoneId: string;
+}): EarlyCloseHoliday {
+  return { type: 'earlyClose', ...opts };
+}
+
 /**
  * Returns the date of a holiday for the given year, or null if it does not
  * occur that year. Does not apply any DateRoll — that is HolidayCalendar's job.
@@ -91,5 +119,7 @@ export function dateForYear(holiday: Holiday, year: number): Temporal.PlainDate 
       return holiday.observance(year);
     case 'anniversary':
       return holiday.date.year === year ? holiday.date : null;
+    case 'earlyClose':
+      return holiday.observance(year);
   }
 }
