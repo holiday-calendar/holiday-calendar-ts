@@ -1,11 +1,12 @@
 // Re-export Temporal so downstream packages only need @holiday-calendar/core as a dep
 export { Temporal } from '@js-temporal/polyfill';
 
-export type { Holiday, FixedHoliday, FloatingHoliday, SpecialAnniversary } from './Holiday.js';
+export type { Holiday, FixedHoliday, FloatingHoliday, SpecialAnniversary, EarlyCloseHoliday } from './Holiday.js';
 export {
   fixedHoliday,
   floatingHoliday,
   specialAnniversary,
+  earlyCloseHoliday,
   dateForYear,
 } from './Holiday.js';
 
