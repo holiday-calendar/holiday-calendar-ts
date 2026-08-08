@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Porting reference
+
+This repo has no porting guide of its own. When implementing new API surface
+or calendars, use `holiday-calendar-java`'s [`docs/PORTING_GUIDE.md`](https://github.com/holiday-calendar/holiday-calendar-java/blob/main/docs/PORTING_GUIDE.md)
+as the design reference, and [`docs/BUILD_SPEC.md`](docs/BUILD_SPEC.md) in
+this repo as the actionable, TS-specific translation of it (current gaps vs.
+Java v2.1.0, target module/calendar layout, and what's explicitly deferred).
+
 ## Commands
 
 ```bash
@@ -47,7 +55,7 @@ This is a TypeScript port of a Java library; comments in source often reference 
 
 **`DateRoll`** is `(date: Temporal.PlainDate) => Temporal.PlainDate`. Built-in strategies in `DateRolls`: `noRoll()`, `previousFridayOrFollowingMonday()`, `followingMonday()`, and `compose()`.
 
-**`HolidayCalendar`** holds a list of holidays, a `DateRoll`, and a set of weekend day-of-week numbers. `.calculate(year)` returns all `HolidayDate`s for a year, applying rolling to rollable holidays. `.merge(other)` unions two calendars' holidays.
+**`HolidayCalendar`** holds a list of holidays, a `DateRoll`, and a set of weekend day-of-week numbers. `.calculate(year)` returns all `HolidayDate`s for a year, applying rolling to rollable holidays. `.merge(other)` unions two calendars' holidays — this already exists, it isn't a gap.
 
 **`HolidayCalendarRegistry`** lazily instantiates and caches calendars from registered `HolidayCalendarProvider`s. Providers are registered explicitly (no ServiceLoader magic) so unused calendars are tree-shaken.
 
@@ -56,6 +64,14 @@ This is a TypeScript port of a Java library; comments in source often reference 
 1. Create observances as `Observance` functions in `packages/western/src/observances/<region>/`.
 2. Create a calendar factory and provider in `packages/western/src/calendars/<code>.ts` following the pattern in `us.ts`.
 3. Export both from `packages/western/src/index.ts`.
+
+**Never conflate a national code with a market/exchange code in one calendar.** A
+country code (`US`, `JP`, …) must contain only that country's genuine national
+public holidays. Market-convention-only closures and early closes (e.g. NYSE
+observing Good Friday) belong on a separate calendar under a market code
+(prefer an ISO 10383 MIC like `XNYS`, or an ISO 4217 currency code like `USD`
+for a central-bank/settlement calendar). See `docs/BUILD_SPEC.md` for the
+current `us.ts` violation of this rule and the planned fix.
 
 ### TypeScript conventions
 
