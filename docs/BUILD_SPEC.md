@@ -155,9 +155,14 @@ even though only `US`/`XNYS` are in scope for the immediate next step:
 | `UK` | `XLON` | London Stock Exchange |
 | `AU` | `XASX` | Australian Securities Exchange |
 | `FR` | `XPAR` | Euronext Paris |
-| `CH` | `XSWX` | SIX Swiss Exchange (no prior national-only calendar) |
-| `DE` | `XETR` | Xetra / Deutsche Börse (no prior national-only calendar) |
+| `CH` | `XSWX` | SIX Swiss Exchange |
+| `DE` | `XETR` | Xetra / Deutsche Börse |
 | `SG` | `XSES` | Singapore Exchange |
+
+Note: unlike the other six, Germany and Switzerland had **no pre-existing
+national-only calendar before v2.1.0** — `DE` and `CH` didn't exist as codes
+at all until Java issues #240 and #239 created them alongside `XETR`/`XSWX`.
+Both national calendars now exist and should be ported as such (see §3).
 
 Central-bank/settlement calendars (`USD`, `CAD`, `GBP`, `AUD`, `CHF`, `EUR`,
 `SGD`) are a third, separate kind of calendar — settlement-system holidays,
@@ -173,10 +178,13 @@ pattern, with observances grouped by domain under `observances/<domain-or-region
 
 - `CA` (national) / `XTSE` (Toronto Stock Exchange) / `CAD` (Bank of Canada)
 - `UK` (national) / `XLON` (London Stock Exchange) / `GBP` (CHAPS)
-- `XSWX` (SIX Swiss Exchange) / `CHF` (SIC/SNB) — Switzerland has no
-  pre-existing national-only calendar in Java either; don't invent one
-  without a documented Swiss national holiday source.
-- `XETR` (Xetra/Deutsche Börse) — same caveat for Germany.
+- `CH` (national, "Switzerland National Holidays" — only Swiss National Day,
+  Aug 1, is federally mandated; the rest is majority-cantonal convention per
+  Java's own javadoc) / `XSWX` (SIX Swiss Exchange) / `CHF` (SIC/SNB)
+- `DE` (national, "Germany National Holidays") / `XETR` (Xetra/Deutsche
+  Börse) — both `CH` and `DE` national calendars are genuinely new as of
+  Java v2.1.0 (issues #239/#240), not pre-existing; verify against live
+  Java source rather than assuming either is a stub.
 - `FR` (national) / `XPAR` (Euronext Paris) / `EUR` (TARGET2)
 - `AU` (national) / `XASX` (Australian Securities Exchange) / `AUD` (RBA)
 
