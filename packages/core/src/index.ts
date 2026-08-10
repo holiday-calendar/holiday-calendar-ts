@@ -16,6 +16,7 @@ export { HolidayCalendar, STANDARD_WEEKEND } from './HolidayCalendar.js';
 export type { HolidayCalendarConfig } from './HolidayCalendar.js';
 
 export { HolidayCalendarNotFoundError } from './HolidayCalendarNotFoundError.js';
+export { InvalidYearRangeError } from './InvalidYearRangeError.js';
 
 export { HolidayCalendarRegistry, createRegistry } from './HolidayCalendarRegistry.js';
 export type { HolidayCalendarProvider } from './HolidayCalendarRegistry.js';
