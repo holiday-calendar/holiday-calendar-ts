@@ -4,6 +4,7 @@ import { DateRolls } from './function/DateRolls.js';
 import type { Holiday } from './Holiday.js';
 import { dateForYear } from './Holiday.js';
 import type { HolidayDate } from './HolidayDate.js';
+import { InvalidYearRangeError } from './InvalidYearRangeError.js';
 
 /**
  * ISO day-of-week numbers for Saturday (6) and Sunday (7).
@@ -54,6 +55,41 @@ export class HolidayCalendar {
       results.push({ holiday, date });
     }
     return results.sort((a, b) => Temporal.PlainDate.compare(a.date, b.date));
+  }
+
+  private static validateRange(fromYear: number, toYear: number): void {
+    if (fromYear > toYear) {
+      throw new InvalidYearRangeError(fromYear, toYear);
+    }
+  }
+
+  /**
+   * Calculates all holidays across the inclusive year range [fromYear, toYear],
+   * flattened into a single chronologically sorted list. Throws
+   * InvalidYearRangeError if fromYear > toYear.
+   */
+  calculateRange(fromYear: number, toYear: number): HolidayDate[] {
+    HolidayCalendar.validateRange(fromYear, toYear);
+    const results: HolidayDate[] = [];
+    for (let year = fromYear; year <= toYear; year++) {
+      results.push(...this.calculate(year));
+    }
+    return results.sort((a, b) => Temporal.PlainDate.compare(a.date, b.date));
+  }
+
+  /**
+   * Calculates all holidays across the inclusive year range [fromYear, toYear],
+   * grouped by nominal year. Every year in the range is present as a key, even
+   * when its holiday list is empty. Throws InvalidYearRangeError if
+   * fromYear > toYear.
+   */
+  calculateByYear(fromYear: number, toYear: number): Map<number, HolidayDate[]> {
+    HolidayCalendar.validateRange(fromYear, toYear);
+    const results = new Map<number, HolidayDate[]>();
+    for (let year = fromYear; year <= toYear; year++) {
+      results.set(year, this.calculate(year));
+    }
+    return results;
   }
 
   /**
