@@ -11,6 +11,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
         with:
@@ -30,5 +32,10 @@ jobs:
       - name: Typecheck
         run: pnpm run typecheck
 
-      - name: Test
-        run: pnpm run test
+      - name: Test with coverage
+        run: pnpm run test:coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
