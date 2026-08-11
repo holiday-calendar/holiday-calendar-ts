@@ -12,6 +12,8 @@ import { InvalidYearRangeError } from './InvalidYearRangeError.js';
  */
 export const STANDARD_WEEKEND: ReadonlySet<number> = new Set([6, 7]);
 
+const isEarlyClose = (holiday: Holiday): boolean => holiday.type === 'earlyClose';
+
 export interface HolidayCalendarConfig {
   readonly code: string;
   readonly name?: string;
@@ -41,20 +43,47 @@ export class HolidayCalendar {
     this.holidays = Array.from(config.holidays);
   }
 
-  /**
-   * Calculates all holidays for the given year, applying date rolling where
-   * the holiday is rollable. Returns results sorted chronologically.
-   */
-  calculate(year: number): HolidayDate[] {
+  private resolve(year: number, include: (holiday: Holiday) => boolean): HolidayDate[] {
     const results: HolidayDate[] = [];
     for (const holiday of this.holidays) {
+      if (!include(holiday)) continue;
       const raw = dateForYear(holiday, year);
       if (raw === null) continue;
-      const rollable = 'rollable' in holiday && holiday.rollable;
+      // EarlyCloseHoliday is never rollable — checked explicitly, not just
+      // by the type declaration omitting the field, so a stray runtime
+      // `rollable` key on an earlyClose object is never honored.
+      const rollable = holiday.type !== 'earlyClose' && holiday.rollable;
       const date = rollable ? this.dateRoll(raw) : raw;
       results.push({ holiday, date });
     }
     return results.sort((a, b) => Temporal.PlainDate.compare(a.date, b.date));
+  }
+
+  /**
+   * Calculates all full-closure holidays for the given year, applying date
+   * rolling where the holiday is rollable. EarlyCloseHoliday entries are
+   * excluded — see calculateEarlyCloses(). Returns results sorted
+   * chronologically.
+   */
+  calculate(year: number): HolidayDate[] {
+    return this.resolve(year, (holiday) => !isEarlyClose(holiday));
+  }
+
+  /**
+   * Calculates only the early-close holidays for the given year. Never
+   * date-rolled — early closes are never weekend-rolled, full stop. Returns
+   * results sorted chronologically.
+   */
+  calculateEarlyCloses(year: number): HolidayDate[] {
+    return this.resolve(year, isEarlyClose);
+  }
+
+  /**
+   * Returns true if this calendar defines any early-close holiday. Cheap and
+   * year-independent — does not resolve any observance dates.
+   */
+  hasEarlyCloses(): boolean {
+    return this.holidays.some(isEarlyClose);
   }
 
   private static validateRange(fromYear: number, toYear: number): void {
@@ -64,8 +93,9 @@ export class HolidayCalendar {
   }
 
   /**
-   * Calculates all holidays across the inclusive year range [fromYear, toYear],
-   * flattened into a single chronologically sorted list. Throws
+   * Calculates all full-closure holidays across the inclusive year range
+   * [fromYear, toYear], flattened into a single chronologically sorted list.
+   * EarlyCloseHoliday entries are excluded, same as calculate(). Throws
    * InvalidYearRangeError if fromYear > toYear.
    */
   calculateRange(fromYear: number, toYear: number): HolidayDate[] {
@@ -78,10 +108,11 @@ export class HolidayCalendar {
   }
 
   /**
-   * Calculates all holidays across the inclusive year range [fromYear, toYear],
-   * grouped by nominal year. Every year in the range is present as a key, even
-   * when its holiday list is empty. Throws InvalidYearRangeError if
-   * fromYear > toYear.
+   * Calculates all full-closure holidays across the inclusive year range
+   * [fromYear, toYear], grouped by nominal year. EarlyCloseHoliday entries
+   * are excluded, same as calculate(). Every year in the range is present as
+   * a key, even when its holiday list is empty. Throws InvalidYearRangeError
+   * if fromYear > toYear.
    */
   calculateByYear(fromYear: number, toYear: number): Map<number, HolidayDate[]> {
     HolidayCalendar.validateRange(fromYear, toYear);
