@@ -5,6 +5,18 @@ on:
   pull_request:
 
 jobs:
+  lint-workflows:
+    name: Lint GitHub Actions workflows
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: actionlint
+        uses: reviewdog/action-actionlint@v1
+        with:
+          fail_level: error
+
   test:
     name: Build, Typecheck & Test
     runs-on: ubuntu-latest

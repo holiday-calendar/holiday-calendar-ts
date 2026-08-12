@@ -14,6 +14,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^3.0.0
         version: 3.2.4(vitest@3.2.4(@types/node@22.19.15)(msw@2.12.14(@types/node@22.19.15)(typescript@5.9.3)))
+      npm-snapshot:
+        specifier: ^1.1.2
+        version: 1.1.2
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
@@ -711,6 +714,11 @@ packages:
   nanoid@3.3.11:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
+  npm-snapshot@1.1.2:
+    resolution: {integrity: sha512-8UoES6hN5PzOIoLsdZI5ZXOxwOAoef/M3R5cylEoBbIDmvwGZoU+1ACzDomW5sqxsYUm3k0idMaG5449SFdNOA==}
+    engines: {node: '>= 4.0.0', npm: '>= 2.12.0'}
     hasBin: true
 
   outvariant@1.4.3:
@@ -1584,6 +1592,8 @@ snapshots:
     optional: true
 
   nanoid@3.3.11: {}
+
+  npm-snapshot@1.1.2: {}
 
   outvariant@1.4.3:
     optional: true

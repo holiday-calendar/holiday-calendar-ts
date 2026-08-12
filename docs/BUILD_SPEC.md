@@ -363,3 +363,21 @@ Pick 2026–2055 to match this document's own forward-looking data range
   future `@holiday-calendar/apac`, `@holiday-calendar/mena`), which already
   mirror Java's module boundaries closely enough that no further translation
   is needed.
+
+## 6. CI/CD: npm publishing
+
+Target registry: `https://registry.npmjs.org`, packages published publicly
+under the `@holiday-calendar` npm scope.
+
+Rationale: unauthenticated `npm install @holiday-calendar/core` is the npm
+ecosystem's default expectation, and GitHub Packages' npm registry would
+force every consumer (not just CI) to authenticate — an adoption barrier
+this project isn't willing to accept ahead of 1.0.0 GA.
+
+This deliberately diverges from `holiday-calendar-java`'s choice of GitHub
+Packages: Maven consumers are already used to configuring extra repositories
+in `settings.xml`/`pom.xml`, so that friction is normal in the Java
+ecosystem; it is not normal in the npm ecosystem, so the registry choice
+here does not mirror Java's 1:1. See issue #36 for the full pipeline design
+(snapshot publishes from `develop` via `publish-snapshot.yml`, release
+publishes from `main` via `publish-release.yml`).
