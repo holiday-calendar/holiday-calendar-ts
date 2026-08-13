@@ -1,6 +1,6 @@
 import { Temporal } from '@js-temporal/polyfill';
 import { describe, expect, it, vi } from 'vitest';
-import { earlyCloseHoliday, fixedHoliday, floatingHoliday } from './Holiday.js';
+import { earlyCloseHoliday, fixedHoliday, floatingHoliday, specialAnniversary } from './Holiday.js';
 import type { EarlyCloseHoliday } from './Holiday.js';
 import { makeObservance } from './function/Observance.js';
 import { DateRolls } from './function/DateRolls.js';
@@ -212,19 +212,92 @@ describe('calculate()/calculateRange()/calculateByYear() exclude early closes', 
   });
 });
 
-describe('open questions — characterization only, pending an engineering decision', () => {
-  it.todo(
-    'merge(): defines precedence when an earlyClose and a full-closure holiday share the same date ' +
-      '(candidate policies: full closure wins / both surface independently — not decided by this issue)',
+describe('decided: earlyClose precedence and weekend-landing policy (issue #35)', () => {
+  // Formerly an it.todo — resolved by issue #35 (BUILD_SPEC.md §8.5): full
+  // closure wins on a same-date collision. See the tests below.
+
+  const sameDate = makeObservance((year) => Temporal.PlainDate.from({ year, month: 7, day: 3 }));
+
+  it.each([
+    ['FixedHoliday', fixedHoliday({ name: 'July 3rd Closure', month: 7, day: 3 })],
+    ['FloatingHoliday', floatingHoliday({ name: 'July 3rd Closure', observance: sameDate })],
+    ['SpecialAnniversary', specialAnniversary({ name: 'July 3rd Closure', date: Temporal.PlainDate.from('2025-07-03') })],
+  ])(
+    'merge(): a %s colliding with an earlyClose on the same date suppresses the earlyClose (issue #35, decided: full closure wins)',
+    (_label, closureHoliday) => {
+      const earlyCloseOnly = new HolidayCalendar({
+        code: 'EARLY',
+        holidays: [earlyCloseHoliday({ name: 'July 3rd Early Close', observance: sameDate, ...NY_13 })],
+      });
+      const merged = new HolidayCalendar({ code: 'CLOSURES', holidays: [closureHoliday] }).merge(earlyCloseOnly);
+
+      expect(merged.calculate(2025)).toHaveLength(1);
+      expect(merged.calculateEarlyCloses(2025)).toHaveLength(0);
+    },
   );
 
-  it('characterizes today\'s merge() behavior: both entries surface independently, one per method', () => {
-    // Characterization, not a spec — revisit if #15's open question on
-    // same-date collisions is settled. The disjointness guarantee this
-    // issue implements is by *type*, not by date, so a collision here is
-    // expected to surface in both methods' outputs rather than being
-    // resolved to one winner.
-    const sameDate = makeObservance((year) => Temporal.PlainDate.from({ year, month: 7, day: 3 }));
+  it('suppresses an earlyClose when a rolled full closure lands on the same date (BUILD_SPEC §8.3 example)', () => {
+    // Not merge()-specific — suppression applies to any calendar, however
+    // its holidays were assembled. 2027-12-25 is a Saturday, so Christmas
+    // Day rolls back to 2027-12-24, colliding with the Christmas Eve close.
+    const calendar = new HolidayCalendar({
+      code: 'XMAS',
+      dateRoll: DateRolls.previousFridayOrFollowingMonday(),
+      holidays: [
+        fixedHoliday({ name: 'Christmas Day', month: 12, day: 25 }),
+        earlyCloseHoliday({ name: 'Christmas Eve Early Close', observance: christmasEve, ...NY_13 }),
+      ],
+    });
+
+    const closures = calendar.calculate(2027);
+    const earlyCloses = calendar.calculateEarlyCloses(2027);
+    expect(closures).toHaveLength(1);
+    expect(closures[0].date.equals(Temporal.PlainDate.from('2027-12-24'))).toBe(true);
+    expect(earlyCloses).toHaveLength(0);
+  });
+
+  it('does not suppress an earlyClose observance that resolves onto a configured weekend day', () => {
+    // 2026-07-04 is a Saturday. Weekend-landing policy is unchanged by
+    // issue #35: no core guard, verified at parity with Java.
+    const saturday = makeObservance((year) => Temporal.PlainDate.from({ year, month: 7, day: 4 }));
+    const calendar = new HolidayCalendar({
+      code: 'WEEKEND-EARLY',
+      holidays: [earlyCloseHoliday({ name: 'Weekend Early Close', observance: saturday, ...NY_13 })],
+    });
+
+    const result = calendar.calculateEarlyCloses(2026);
+    expect(result).toHaveLength(1);
+    expect(result[0].date.equals(Temporal.PlainDate.from({ year: 2026, month: 7, day: 4 }))).toBe(true);
+  });
+
+  it('merge(): unions earlyCloses from two calendars on different, non-colliding dates', () => {
+    const julyThird = new HolidayCalendar({
+      code: 'JULY',
+      holidays: [earlyCloseHoliday({ name: 'July 3rd Early Close', observance: july3, ...NY_13 })],
+    });
+    const decemberEve = new HolidayCalendar({
+      code: 'DEC',
+      holidays: [earlyCloseHoliday({ name: 'Christmas Eve Early Close', observance: christmasEve, ...NY_13 })],
+    });
+    const merged = julyThird.merge(decemberEve);
+
+    const result = merged.calculateEarlyCloses(2025);
+    expect(result).toHaveLength(2);
+    expect(result[0].date.equals(Temporal.PlainDate.from('2025-07-03'))).toBe(true);
+    expect(result[1].date.equals(Temporal.PlainDate.from('2025-12-24'))).toBe(true);
+  });
+
+  it('merge(): hasEarlyCloses() becomes true after merging in a calendar with early closes', () => {
+    const merged = makeNoEarlyCloseCalendar().merge(
+      new HolidayCalendar({
+        code: 'EARLY',
+        holidays: [earlyCloseHoliday({ name: 'July 3rd Early Close', observance: july3, ...NY_13 })],
+      }),
+    );
+    expect(merged.hasEarlyCloses()).toBe(true);
+  });
+
+  it('merge(): hasEarlyCloses() stays true even in a year where the earlyClose is fully suppressed by a collision', () => {
     const closuresOnly = new HolidayCalendar({
       code: 'CLOSURES',
       holidays: [floatingHoliday({ name: 'July 3rd Closure', observance: sameDate })],
@@ -235,16 +308,22 @@ describe('open questions — characterization only, pending an engineering decis
     });
     const merged = closuresOnly.merge(earlyCloseOnly);
 
-    const closures = merged.calculate(2025);
-    const earlyCloses = merged.calculateEarlyCloses(2025);
-    expect(closures).toHaveLength(1);
-    expect(earlyCloses).toHaveLength(1);
-    expect(closures[0].date.equals(earlyCloses[0].date)).toBe(true);
+    expect(merged.calculateEarlyCloses(2025)).toHaveLength(0);
+    expect(merged.hasEarlyCloses()).toBe(true);
   });
 
-  it.todo(
-    'defines whether an earlyClose observance resolving to a configured weekend day should be ' +
-      'suppressed (the "never rolls" test above locks in unrolled behavior, not unsuppressed — a ' +
-      'future filter policy is not pre-approved by that test)',
+  it(
+    'merge(): does not dedup an identical earlyClose defined on both sides (characterization, not a ' +
+      'guarantee — see follow-up issue on merge() field/dedup semantics)',
+    () => {
+      const makeSide = () =>
+        new HolidayCalendar({
+          code: 'SIDE',
+          holidays: [earlyCloseHoliday({ name: 'July 3rd Early Close', observance: july3, ...NY_13 })],
+        });
+      const merged = makeSide().merge(makeSide());
+
+      expect(merged.calculateEarlyCloses(2025)).toHaveLength(2);
+    },
   );
 });

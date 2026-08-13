@@ -140,7 +140,9 @@ convention"), not by structure.
      (when July 4th is a weekday), the day after Thanksgiving, and Christmas
      Eve — each 13:00 `America/New_York`, non-rollable, present/absent per
      NYSE's actual published rule (verify current rule via primary source
-     before implementing; don't guess from memory).
+     before implementing; don't guess from memory). (A colliding full
+     closure on the same date suppresses the early close from
+     `calculateEarlyCloses()` — see §8.5.)
 3. Register `xnysProvider` alongside `usProvider` in
    `packages/western/src/index.ts`.
 
@@ -325,8 +327,10 @@ Pick 2026–2055 to match this document's own forward-looking data range
 - **Cross-list date collisions** — a rolled regular holiday can land on the
   same date as an unrelated early close (e.g. Christmas Day rolling back onto
   December 24 in a year where December 25 is a Saturday, colliding with a
-  Christmas Eve early close). Assert this produces two independent
-  `HolidayDate` entries on the same date, not a silent drop of one.
+  Christmas Eve early close). The full closure wins: assert
+  `calculateEarlyCloses()` suppresses the colliding early-close entry for
+  that date, while `calculate()`'s full-closure entry is unaffected. See §8.5
+  for full policy and rationale (issue #35).
 - **`Temporal.PlainDate` equality** — use `.equals()`/
   `Temporal.PlainDate.compare()` in assertions and in library code; never
   `===`/`!==` on `Temporal.Plain*` values (see the
@@ -346,6 +350,34 @@ Pick 2026–2055 to match this document's own forward-looking data range
   year — document this as intentional per-year-snapshot behavior, not a bug.
 - **Japan's cascade** (§4) — verify cascade-before-sandwich ordering with a
   dedicated test, not just incidental coverage from the 30-year suite.
+
+### 8.5 EarlyClose precedence and weekend-landing policy (issue #35)
+
+Two edge cases around `EarlyCloseHoliday` were raised and decided:
+
+- **Same-date collision with a full closure — full closure wins.** When a
+  full-closure holiday (`FixedHoliday`/`FloatingHoliday`/`SpecialAnniversary`)
+  and an `EarlyCloseHoliday` resolve to the same date within a calendar,
+  `calculateEarlyCloses()` suppresses the colliding early-close entry;
+  `calculate()`'s full-closure entry is unaffected. Rationale: a full closure
+  is the stronger, calendar-level signal that the entire day — including any
+  window that would otherwise be a partial trading session — is non-trading.
+  Reporting both independently on the same date gives a client contradictory
+  information about that day. This matters in practice for merged market
+  calendars: merging an `XNYS` calendar (Good Friday modeled as an early
+  close) with an `XLON` calendar (Good Friday modeled as a full closure)
+  must not report an early close for Good Friday once the merged calendar
+  also says it's a full closure that day. Collision is determined by
+  comparing `calculate()`'s rolled dates against `calculateEarlyCloses()`'s
+  never-rolled dates for the same year — not raw authored dates.
+- **Early close landing on a configured weekend day — do nothing.** No core
+  guard exists or is planned. Confirmed at parity with
+  `holiday-calendar-java`: `HolidayCalendar.calculateEarlyCloses()` in Java
+  also never checks `weekendDays`; rolling/weekend logic in both languages is
+  gated by `holiday.isRollable()`, and `EarlyCloseHoliday` is hardcoded
+  non-rollable in both. Region packages (e.g. the planned `XNYS` calendar in
+  §2) are responsible for only encoding early closes on dates that are
+  correct against the actual weekend/trading calendar.
 
 ## 9. Non-goals / explicitly deferred
 

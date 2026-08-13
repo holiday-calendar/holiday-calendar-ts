@@ -71,11 +71,25 @@ export class HolidayCalendar {
 
   /**
    * Calculates only the early-close holidays for the given year. Never
-   * date-rolled — early closes are never weekend-rolled, full stop. Returns
-   * results sorted chronologically.
+   * date-rolled — early closes are never weekend-rolled, full stop.
+   *
+   * If an early close's resolved date collides with a full-closure holiday's
+   * resolved date (from calculate()) in the same year, the early close is
+   * suppressed from this result — a full closure is the stronger signal that
+   * the whole day is non-trading, so reporting both would give a client
+   * contradictory information about the same date (e.g. when merging two
+   * independently-authored market calendars). See BUILD_SPEC.md §8.5 (issue
+   * #35) for full rationale.
+   *
+   * Does not guard against an early close landing on a configured weekendDay
+   * — verified at parity with Java, which doesn't either; region packages own
+   * that data correctness.
+   *
+   * Returns results sorted chronologically.
    */
   calculateEarlyCloses(year: number): HolidayDate[] {
-    return this.resolve(year, isEarlyClose);
+    const closureDates = new Set(this.calculate(year).map((hd) => hd.date.toString()));
+    return this.resolve(year, isEarlyClose).filter((hd) => !closureDates.has(hd.date.toString()));
   }
 
   /**
