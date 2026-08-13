@@ -1,6 +1,7 @@
 {
   "name": "@holiday-calendar/apac",
   "version": "0.0.1",
+  "private": true,
   "description": "APAC regional holiday calendars for the Holiday Calendar library",
   "type": "module",
   "main": "dist/index.js",
