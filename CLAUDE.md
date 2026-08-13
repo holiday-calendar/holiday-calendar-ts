@@ -25,6 +25,7 @@ pnpm test:watch
 # Run tests for a single package (by vitest project name)
 pnpm test --project core
 pnpm test --project western
+pnpm test --project apac
 
 # Type-check all packages
 pnpm typecheck
@@ -37,10 +38,11 @@ Node and pnpm versions are managed by Volta (Node 22.14.0, pnpm 10.6.0).
 
 ## Architecture
 
-This is a pnpm workspace monorepo with two packages under `packages/`:
+This is a pnpm workspace monorepo with three packages under `packages/`:
 
 - **`@holiday-calendar/core`** — the abstract API: `Holiday` types, `HolidayCalendar`, `HolidayCalendarRegistry`, `Observance`, and `DateRoll` function types.
 - **`@holiday-calendar/western`** — concrete implementations: the US calendar and its observances (Easter, floating US holidays). Other regions will be added here.
+- **`@holiday-calendar/apac`** — scaffold only; no calendars implemented yet (see `docs/BUILD_SPEC.md` §4 for planned calendars, tracked in follow-on issues).
 
 This is a TypeScript port of a Java library; comments in source often reference Java equivalents.
 

@@ -25,6 +25,14 @@ export default defineConfig({
           environment: 'node',
         },
       },
+      {
+        test: {
+          name: 'apac',
+          root: './packages/apac',
+          include: ['src/**/*.{test,spec}.ts'],
+          environment: 'node',
+        },
+      },
     ],
   },
 });
