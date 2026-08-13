@@ -1,0 +1,99 @@
+name: Publish
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [develop]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish-snapshot:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: snapshot-publish
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Verify checked-out commit matches triggering run
+        run: |
+          if [ "$(git rev-parse HEAD)" != "${{ github.event.workflow_run.head_sha }}" ]; then
+            echo "Checked-out HEAD does not match workflow_run.head_sha" >&2
+            exit 1
+          fi
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+          scope: '@holiday-calendar'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Bump snapshot versions (core, then western)
+        run: |
+          TAG=next
+          (cd packages/core && pnpm exec npm-snapshot "${{ github.event.workflow_run.run_number }}" "$TAG")
+          (cd packages/western && pnpm exec npm-snapshot "${{ github.event.workflow_run.run_number }}" "$TAG")
+
+      - name: Publish workspace (dependency order enforced by -r)
+        run: pnpm publish -r --no-git-checks --tag next
+
+  publish-release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+          scope: '@holiday-calendar'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Test with coverage
+        run: pnpm run test:coverage
+
+      - name: Require BOTH packages to be non-prerelease before publishing either
+        run: |
+          for pkg in core western; do
+            VERSION=$(node -p "require('./packages/$pkg/package.json').version")
+            echo "$pkg version: $VERSION"
+            if [[ "$VERSION" == *-* ]]; then
+              echo "::error::packages/$pkg is at prerelease version $VERSION — release publish requires both packages to be non-prerelease simultaneously."
+              exit 1
+            fi
+          done
+
+      - name: Publish workspace (dependency order enforced by -r)
+        run: pnpm publish -r --no-git-checks
