@@ -10,6 +10,10 @@ concurrency:
   group: snapshot-publish
   cancel-in-progress: false
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   publish-snapshot:
     if: github.event.workflow_run.conclusion == 'success'
@@ -28,12 +32,10 @@ jobs:
           fi
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10.6.0
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
           scope: '@holiday-calendar'
@@ -52,5 +54,3 @@ jobs:
 
       - name: Publish workspace (dependency order enforced by -r)
         run: pnpm publish -r --no-git-checks --tag next
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
