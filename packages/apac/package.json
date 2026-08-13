@@ -1,7 +1,6 @@
 {
   "name": "@holiday-calendar/apac",
   "version": "0.0.1",
-  "private": true,
   "description": "APAC regional holiday calendars for the Holiday Calendar library",
   "type": "module",
   "main": "dist/index.js",
@@ -12,11 +11,23 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit"
   },
   "license": "LGPL-2.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/holiday-calendar/holiday-calendar-ts.git",
+    "directory": "packages/apac"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "dependencies": {
     "@holiday-calendar/core": "workspace:*"
   }

@@ -47,11 +47,12 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Bump snapshot versions (core, then western)
+      - name: Bump snapshot versions (core, western, apac)
         run: |
           TAG=next
           (cd packages/core && pnpm exec npm-snapshot "${{ github.event.workflow_run.run_number }}" "$TAG")
           (cd packages/western && pnpm exec npm-snapshot "${{ github.event.workflow_run.run_number }}" "$TAG")
+          (cd packages/apac && pnpm exec npm-snapshot "${{ github.event.workflow_run.run_number }}" "$TAG")
 
       - name: Publish workspace (dependency order enforced by -r)
         run: pnpm publish -r --no-git-checks --tag next
@@ -84,13 +85,13 @@ jobs:
       - name: Test with coverage
         run: pnpm run test:coverage
 
-      - name: Require BOTH packages to be non-prerelease before publishing either
+      - name: Require ALL packages to be non-prerelease before publishing any
         run: |
-          for pkg in core western; do
+          for pkg in core western apac; do
             VERSION=$(node -p "require('./packages/$pkg/package.json').version")
             echo "$pkg version: $VERSION"
             if [[ "$VERSION" == *-* ]]; then
-              echo "::error::packages/$pkg is at prerelease version $VERSION — release publish requires both packages to be non-prerelease simultaneously."
+              echo "::error::packages/$pkg is at prerelease version $VERSION — release publish requires all packages to be non-prerelease simultaneously."
               exit 1
             fi
           done
