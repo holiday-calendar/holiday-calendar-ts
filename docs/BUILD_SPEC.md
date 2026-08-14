@@ -17,7 +17,7 @@ where a topic corresponds 1:1, to make cross-referencing easy.
 | `Holiday` kinds | 4: Fixed, Floating, SpecialAnniversary, EarlyClose | 3: Fixed, Floating, SpecialAnniversary — **no EarlyClose** |
 | `HolidayCalendar.calculate` | `calculate(year)`, `calculate(fromYear, toYear)`, `calculateByYear(fromYear, toYear)`, `calculateEarlyCloses(year)`, `hasEarlyCloses()` | only `calculate(year)` |
 | `DateRoll` strategies | 6: `noRoll`, `previousFridayOrFollowingMonday`, `followingMonday`, `sundayToMonday`, `followingSunday`, `previousThursdayOrFollowingSunday` | 3: `noRoll`, `previousFridayOrFollowingMonday`, `followingMonday` |
-| `merge()` | yes | **yes — already ported**, no gap |
+| `merge()` | yes | yes — ported to full parity (issue #44 closed the code/name/dateRoll/weekendDays composition and holiday-dedup gap), no gap |
 | Plugin mechanism | `ServiceLoader` + `module-info.java` | explicit `HolidayCalendarRegistry.register()` (deliberate, see `CLAUDE.md`) — not a gap, a different-by-design choice |
 | National vs. market split | enforced (v2.1.0 fix, §5 below) | **violated** — `US` calendar bundles NYSE-only holidays |
 | Regions | western, apac, mena (~30 codes) | western only, 1 code (`US`) |

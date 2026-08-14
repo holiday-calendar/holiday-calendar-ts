@@ -1,8 +1,9 @@
 import { Temporal } from '@js-temporal/polyfill';
 import type { DateRoll } from './function/DateRoll.js';
 import { DateRolls } from './function/DateRolls.js';
+import type { Observance } from './function/Observance.js';
 import type { Holiday } from './Holiday.js';
-import { dateForYear } from './Holiday.js';
+import { dateForYear, holidayKey } from './Holiday.js';
 import type { HolidayDate } from './HolidayDate.js';
 import { InvalidYearRangeError } from './InvalidYearRangeError.js';
 
@@ -138,16 +139,29 @@ export class HolidayCalendar {
   }
 
   /**
-   * Returns a new HolidayCalendar with the union of holidays from both calendars,
-   * preserving this calendar's code, name, dateRoll, and weekendDays.
+   * Returns a new HolidayCalendar combining this calendar and other: codes
+   * and names are concatenated, dateRolls are composed (other's roll applied
+   * first, then this one's), weekendDays are unioned, and holidays are
+   * deduped by structural equality (see holidayKey()). Equivalent to Java's
+   * HolidayCalendar.merge().
    */
   merge(other: HolidayCalendar): HolidayCalendar {
+    const observanceIds = new Map<Observance, number>();
+    const seen = new Set<string>();
+    const mergedHolidays: Holiday[] = [];
+    for (const holiday of [...this.holidays, ...other.holidays]) {
+      const key = holidayKey(holiday, observanceIds);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      mergedHolidays.push(holiday);
+    }
+
     return new HolidayCalendar({
-      code: this.code,
-      name: this.name,
-      dateRoll: this.dateRoll,
-      weekendDays: this.weekendDays,
-      holidays: [...this.holidays, ...other.holidays],
+      code: this.code + '/' + other.code,
+      name: this.name + ' + ' + other.name,
+      dateRoll: DateRolls.compose(other.dateRoll, this.dateRoll),
+      weekendDays: new Set([...this.weekendDays, ...other.weekendDays]),
+      holidays: mergedHolidays,
     });
   }
 
