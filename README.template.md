@@ -3,12 +3,9 @@
 
 [![CI](https://github.com/holiday-calendar/holiday-calendar-ts/actions/workflows/ci.yml/badge.svg)](https://github.com/holiday-calendar/holiday-calendar-ts/actions/workflows/ci.yml)
 [![License: LGPL v2.1](https://img.shields.io/badge/License-LGPL_v2.1-blue.svg)](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)
-[![npm: @holiday-calendar/core](https://img.shields.io/npm/v/%40holiday-calendar%2Fcore.svg)](https://www.npmjs.com/package/@holiday-calendar/core)
-[![npm: @holiday-calendar/western](https://img.shields.io/npm/v/%40holiday-calendar%2Fwestern.svg)](https://www.npmjs.com/package/@holiday-calendar/western)
+[![npm version](https://img.shields.io/npm/v/%40holiday-calendar%2Fcore.svg)](https://www.npmjs.com/package/@holiday-calendar/core)
 
 A TypeScript library for defining and calculating holiday calendars. Provides an extensible foundation for generating the calendars used to determine when holidays occur and when they are observed worldwide.
-
-This README reflects `@holiday-calendar/core@{{VERSION}}`.
 
 ## About
 
