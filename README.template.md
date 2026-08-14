@@ -8,7 +8,7 @@
 
 A TypeScript library for defining and calculating holiday calendars. Provides an extensible foundation for generating the calendars used to determine when holidays occur and when they are observed worldwide.
 
-This README reflects `@holiday-calendar/core@0.0.1`.
+This README reflects `@holiday-calendar/core@{{VERSION}}`.
 
 ## About
 
