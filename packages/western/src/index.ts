@@ -5,7 +5,15 @@ export { createUSCalendar, usProvider } from './calendars/us.js';
 export { westernEaster, orthodoxEaster, ORTHODOX_MIN_YEAR, ORTHODOX_MAX_YEAR } from './observances/easter.js';
 
 // Christian observances
+export { ashWednesday } from './observances/christian/ashWednesday.js';
+export { ascensionDay } from './observances/christian/ascensionDay.js';
+export { corpusChristi } from './observances/christian/corpusChristi.js';
+export { easterMonday } from './observances/christian/easterMonday.js';
 export { goodFriday } from './observances/christian/goodFriday.js';
+export { palmSunday } from './observances/christian/palmSunday.js';
+export { shroveTuesday } from './observances/christian/shroveTuesday.js';
+export { whitMonday } from './observances/christian/whitMonday.js';
+export { whitSunday } from './observances/christian/whitSunday.js';
 
 // US observances
 export { martinLutherKingJrDay } from './observances/us/martinLutherKingJrDay.js';
