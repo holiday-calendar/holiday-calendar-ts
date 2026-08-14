@@ -19,6 +19,9 @@
     "typecheck": "tsc --noEmit"
   },
   "license": "LGPL-2.1",
+  "engines": {
+    "node": ">=22"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/holiday-calendar/holiday-calendar-ts.git",
