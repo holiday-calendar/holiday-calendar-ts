@@ -9,7 +9,7 @@ A TypeScript library for defining and calculating holiday calendars. Provides an
 
 ## About
 
-Holiday Calendar (TypeScript) answers a common need in financial, scheduling, and business applications: _"Is this date a business day?"_ and _"When is this holiday observed this year?"_
+Holiday Calendar answers common needs in financial, scheduling, and business applications: _"Is this date a business day?"_ and _"When is this holiday observed this year?"_
 
 Key design goals:
 

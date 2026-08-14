@@ -312,18 +312,14 @@ describe('decided: earlyClose precedence and weekend-landing policy (issue #35)'
     expect(merged.hasEarlyCloses()).toBe(true);
   });
 
-  it(
-    'merge(): does not dedup an identical earlyClose defined on both sides (characterization, not a ' +
-      'guarantee — see follow-up issue on merge() field/dedup semantics)',
-    () => {
-      const makeSide = () =>
-        new HolidayCalendar({
-          code: 'SIDE',
-          holidays: [earlyCloseHoliday({ name: 'July 3rd Early Close', observance: july3, ...NY_13 })],
-        });
-      const merged = makeSide().merge(makeSide());
+  it('merge(): dedups an identical earlyClose sharing an Observance reference on both sides (issue #44)', () => {
+    const makeSide = () =>
+      new HolidayCalendar({
+        code: 'SIDE',
+        holidays: [earlyCloseHoliday({ name: 'July 3rd Early Close', observance: july3, ...NY_13 })],
+      });
+    const merged = makeSide().merge(makeSide());
 
-      expect(merged.calculateEarlyCloses(2025)).toHaveLength(2);
-    },
-  );
+    expect(merged.calculateEarlyCloses(2025)).toHaveLength(1);
+  });
 });

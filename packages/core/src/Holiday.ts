@@ -108,6 +108,44 @@ export function earlyCloseHoliday(opts: {
 }
 
 /**
+ * Structural dedup key for a Holiday, for use across a single merge() call.
+ * Two holidays produce the same key only when every field matches, including
+ * sharing the same Observance function reference for floating/earlyClose
+ * holidays — mirrors Java's record-generated equals()/hashCode(), where a
+ * functional-interface field compares by identity, not structurally.
+ *
+ * `observanceIds` assigns stable ids to Observance references seen so far;
+ * callers should pass a fresh Map scoped to one merge() invocation.
+ */
+export function holidayKey(holiday: Holiday, observanceIds: Map<Observance, number>): string {
+  const observanceId = (observance: Observance): number => {
+    let id = observanceIds.get(observance);
+    if (id === undefined) {
+      id = observanceIds.size;
+      observanceIds.set(observance, id);
+    }
+    return id;
+  };
+  switch (holiday.type) {
+    case 'fixed':
+      return JSON.stringify(['fixed', holiday.name, holiday.description, holiday.month, holiday.day, holiday.rollable]);
+    case 'floating':
+      return JSON.stringify(['floating', holiday.name, holiday.description, observanceId(holiday.observance), holiday.rollable]);
+    case 'anniversary':
+      return JSON.stringify(['anniversary', holiday.name, holiday.description, holiday.date.toString(), holiday.rollable]);
+    case 'earlyClose':
+      return JSON.stringify([
+        'earlyClose',
+        holiday.name,
+        holiday.description,
+        observanceId(holiday.observance),
+        holiday.closeTime.toString(),
+        holiday.timeZoneId,
+      ]);
+  }
+}
+
+/**
  * Returns the date of a holiday for the given year, or null if it does not
  * occur that year. Does not apply any DateRoll — that is HolidayCalendar's job.
  */
