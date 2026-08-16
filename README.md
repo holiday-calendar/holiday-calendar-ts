@@ -22,6 +22,7 @@ Key design goals:
 | Code | Region |
 |------|--------|
 | `US` | United States National Holidays |
+| `CA` | Canada National Holidays |
 | `UK` | United Kingdom National Holidays |
 
 ## Installation
