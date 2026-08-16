@@ -2,6 +2,7 @@
 export { createUSCalendar, usProvider } from './calendars/us.js';
 export { createCACalendar, caProvider } from './calendars/ca.js';
 export { createUKCalendar, ukProvider, ukFixedHolidayRoll } from './calendars/uk.js';
+export { createFRCalendar, frProvider } from './calendars/fr.js';
 
 // Easter observances
 export { westernEaster, orthodoxEaster, ORTHODOX_MIN_YEAR, ORTHODOX_MAX_YEAR } from './observances/easter.js';
