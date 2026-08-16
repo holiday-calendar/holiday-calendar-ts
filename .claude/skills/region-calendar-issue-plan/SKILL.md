@@ -97,12 +97,18 @@ Write the plan file with these sections:
 - **Implementation** — concrete new/changed files, factory-function calls,
   registration changes, naming decisions, explicit "no
   `@holiday-calendar/core` changes needed" confirmation (or what's needed if
-  not).
+  not). If the issue adds a **new calendar** (not just a new holiday or
+  roll-rule change on an existing one), also include updating the root
+  `README.template.md`'s Supported Calendars table and the affected
+  package's install-line comment (e.g. "Western calendars: US, UK") — this
+  has been missed before because nothing else in Phase 1 surfaces that file.
 - **Tests** — concrete new/updated test files, fixture tables sourced from
   the research analyst's verified data, and any 30-year integration test
   addition.
 - **Verification** — the `pnpm` commands to run before considering this done
-  (`pnpm test --project <region>`, `pnpm typecheck`).
+  (`pnpm test --project <region>`, `pnpm typecheck`, and — only when this
+  plan touched `README.template.md` — `pnpm run readme` to regenerate
+  `README.md`).
 
 Call `ExitPlanMode` once the plan is written and any open questions are
 resolved.
