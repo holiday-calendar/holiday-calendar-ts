@@ -37,3 +37,19 @@ export function lastWeekdayOfMonth(
   const diff = (last.dayOfWeek - dayOfWeek + 7) % 7;
   return last.subtract({ days: diff });
 }
+
+/**
+ * Returns the given ISO day-of-week immediately preceding `date`, strictly
+ * before it (never returns `date` itself, even if `date` already falls on
+ * that day-of-week).
+ *
+ * @param date      - The reference date
+ * @param dayOfWeek - ISO day: 1=Monday … 7=Sunday
+ */
+export function weekdayImmediatelyBefore(
+  date: Temporal.PlainDate,
+  dayOfWeek: number,
+): Temporal.PlainDate {
+  const diff = (date.dayOfWeek - dayOfWeek + 7) % 7 || 7;
+  return date.subtract({ days: diff });
+}
