@@ -1,5 +1,6 @@
 // Calendars
 export { createUSCalendar, usProvider } from './calendars/us.js';
+export { createUKCalendar, ukProvider, ukFixedHolidayRoll } from './calendars/uk.js';
 
 // Easter observances
 export { westernEaster, orthodoxEaster, ORTHODOX_MIN_YEAR, ORTHODOX_MAX_YEAR } from './observances/easter.js';
@@ -23,6 +24,11 @@ export { laborDay } from './observances/us/laborDay.js';
 export { columbusDay } from './observances/us/columbusDay.js';
 export { thanksgiving } from './observances/us/thanksgiving.js';
 export { dayAfterThanksgiving } from './observances/us/dayAfterThanksgiving.js';
+
+// UK observances
+export { earlyMayBankHoliday } from './observances/uk/earlyMayBankHoliday.js';
+export { springBankHoliday } from './observances/uk/springBankHoliday.js';
+export { summerBankHoliday } from './observances/uk/summerBankHoliday.js';
 
 // Utilities (for use by calendar implementors)
 export { nthWeekdayOfMonth, lastWeekdayOfMonth } from './observances/utils.js';
