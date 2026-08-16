@@ -61,7 +61,7 @@ export class HolidayCalendarRegistry {
 
   /** Returns all registered codes in alphabetical order. */
   codes(): string[] {
-    return [...this.providers.keys()].sort();
+    return [...this.providers.keys()].sort((a, b) => a.localeCompare(b));
   }
 }
 
