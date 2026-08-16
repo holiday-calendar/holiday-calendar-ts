@@ -22,6 +22,7 @@ Key design goals:
 | Code | Region |
 |------|--------|
 | `US` | United States National Holidays |
+| `UK` | United Kingdom National Holidays |
 
 ## Installation
 
@@ -31,7 +32,7 @@ Holiday Calendar requires **Node.js 22** or higher. The packages are published t
 # Core API (required)
 npm install @holiday-calendar/core
 
-# Western calendars: US
+# Western calendars: US, UK
 npm install @holiday-calendar/western
 ```
 
