@@ -21,12 +21,13 @@ Key design goals:
 
 | Code | Region |
 |------|--------|
-| `US` | United States National Holidays |
+| `AU` | Australia National Holidays |
 | `CA` | Canada National Holidays |
-| `UK` | United Kingdom National Holidays |
-| `FR` | France National Holidays |
 | `CH` | Switzerland National Holidays |
 | `DE` | Germany National Holidays |
+| `FR` | France National Holidays |
+| `UK` | United Kingdom National Holidays |
+| `US` | United States National Holidays |
 
 ## Installation
 
@@ -36,7 +37,7 @@ Holiday Calendar requires **Node.js 22** or higher. The packages are published t
 # Core API (required)
 npm install @holiday-calendar/core
 
-# Western calendars: US, CA, UK, FR, DE, CH
+# Western calendars: US, CA, UK, FR, DE, CH, AU
 npm install @holiday-calendar/western
 ```
 
