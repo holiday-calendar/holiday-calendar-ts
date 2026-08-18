@@ -125,6 +125,27 @@ describe('AU calendar — Christmas Day / Boxing Day weekend cascade (2027)', ()
   });
 });
 
+describe('AU calendar — ANZAC Day / Easter Monday collision (2038)', () => {
+  const calendar = createAUCalendar();
+
+  it('ANZAC Day (rolled) and Easter Monday both land on 2038-04-26, since Easter Sunday 2038 falls on Apr 25', () => {
+    // 2038 is the next year (after 1943) in which western Easter Sunday
+    // falls on its latest possible date, Apr 25 — which also happens to be
+    // ANZAC Day's raw fixed date. Since Easter Sunday is always a Sunday,
+    // ANZAC Day (raw Apr 25, rollable) rolls +1 to Apr 26 under
+    // auFixedHolidayRoll — the same date as Easter Monday (Easter Sunday +
+    // 1, not rollable). This is a rare cross-holiday-type collision, not a
+    // roll-rule bug: each holiday's date is computed independently, and the
+    // DateRoll function has no visibility into other holidays' dates to
+    // avoid it (unlike the Christmas/Boxing Day cascade, which is handled
+    // deliberately because those two dates are always exactly 1 day apart).
+    expect(d('2038-04-25').dayOfWeek).toBe(7); // Sunday: Easter Sunday and raw ANZAC Day
+    const dates2038 = calendar.calculate(2038);
+    expect(dates2038).toHaveLength(9);
+    expect(namesOn(dates2038, '2038-04-26').sort()).toEqual(['ANZAC Day', 'Easter Monday']);
+  });
+});
+
 describe('AU calendar — scope boundary (no state-only holidays)', () => {
   const calendar = createAUCalendar();
 
