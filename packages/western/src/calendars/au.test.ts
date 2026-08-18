@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { Temporal } from '@holiday-calendar/core';
 import type { HolidayDate } from '@holiday-calendar/core';
-import { createAUCalendar, auProvider } from './au.js';
+import { createAUCalendar, auProvider, auFixedHolidayRoll } from './au.js';
 
 const d = (iso: string) => Temporal.PlainDate.from(iso);
 
@@ -9,6 +9,44 @@ const namesOn = (dates: HolidayDate[], iso: string): string[] =>
   dates.filter((hd) => hd.date.equals(d(iso))).map((hd) => hd.holiday.name);
 
 const nameOn = (dates: HolidayDate[], iso: string): string | undefined => namesOn(dates, iso)[0];
+
+describe('auFixedHolidayRoll', () => {
+  it('rolls a Saturday forward by 2 days regardless of which holiday', () => {
+    // 2028-01-01 is a Saturday -> New Year's Day rolls +2 to Jan 3
+    expect(auFixedHolidayRoll(d('2028-01-01')).equals(d('2028-01-03'))).toBe(true);
+    // 2030-01-26 is a Saturday -> Australia Day rolls +2 to Jan 28
+    expect(auFixedHolidayRoll(d('2030-01-26')).equals(d('2030-01-28'))).toBe(true);
+    // 2027-12-25 is a Saturday -> Christmas Day rolls +2 to Dec 27
+    expect(auFixedHolidayRoll(d('2027-12-25')).equals(d('2027-12-27'))).toBe(true);
+    // 2026-12-26 is a Saturday -> Boxing Day rolls +2 to Dec 28
+    expect(auFixedHolidayRoll(d('2026-12-26')).equals(d('2026-12-28'))).toBe(true);
+  });
+
+  it('rolls a Sunday forward by 1 day for non-Christmas/Boxing holidays', () => {
+    // 2025-01-26 is a Sunday -> Australia Day rolls +1 to Jan 27
+    expect(auFixedHolidayRoll(d('2025-01-26')).equals(d('2025-01-27'))).toBe(true);
+    // 2027-04-25 is a Sunday -> ANZAC Day rolls +1 to Apr 26
+    expect(auFixedHolidayRoll(d('2027-04-25')).equals(d('2027-04-26'))).toBe(true);
+  });
+
+  it('rolls a Sunday forward by 2 days for Christmas Day/Boxing Day, to avoid colliding with each other', () => {
+    // 2022-12-25 is a Sunday -> Christmas Day rolls +2 to Dec 27 (Dec 26,
+    // the following Monday, is already Boxing Day)
+    expect(auFixedHolidayRoll(d('2022-12-25')).equals(d('2022-12-27'))).toBe(true);
+    // 2021-12-26 is a Sunday -> Boxing Day rolls +2 to Dec 28
+    expect(auFixedHolidayRoll(d('2021-12-26')).equals(d('2021-12-28'))).toBe(true);
+  });
+
+  it.each([
+    ['2024-01-01', '2024-01-01'], // Monday, no roll
+    ['2024-01-26', '2024-01-26'], // Friday, no roll
+    ['2024-04-25', '2024-04-25'], // Thursday, no roll
+    ['2024-12-25', '2024-12-25'], // Wednesday, no roll
+    ['2024-12-26', '2024-12-26'], // Thursday, no roll
+  ])('%s stays %s on a weekday', (input, expected) => {
+    expect(auFixedHolidayRoll(d(input)).equals(d(expected))).toBe(true);
+  });
+});
 
 describe('AU calendar — basic wiring', () => {
   const calendar = createAUCalendar();
@@ -49,47 +87,41 @@ describe('AU calendar — exact holiday set, non-roll-heavy year (2024)', () => 
   });
 });
 
-describe('AU calendar — fixed-holiday roll regression (Sat -> prev Friday, Sun -> following Monday)', () => {
+describe('AU calendar — fixed-holiday roll regression (Sat -> +2, Sun -> +1, Christmas/Boxing Sun -> +2)', () => {
   const calendar = createAUCalendar();
 
   // Good Friday, Easter Saturday, Easter Monday, and King's Birthday are
   // floating and never rollable, so they're not covered here. New Year's
-  // Day's roll is covered by the dedicated cross-year-boundary test below.
-  // Christmas Day 2026 and Boxing Day 2026's own Saturday instance are
-  // deliberately excluded here — covered by the dedicated collision test.
+  // Day and the Christmas/Boxing Day cascade get their own dedicated tests
+  // below, not duplicated here.
   it.each([
-    [2025, 'Australia Day', '2025-01-27', 'Sun -> following Mon'],
-    [2030, 'Australia Day', '2030-01-25', 'Sat -> prev Fri'],
-    [2026, 'ANZAC Day', '2026-04-24', 'Sat -> prev Fri'],
-    [2027, 'ANZAC Day', '2027-04-26', 'Sun -> following Mon'],
-    [2027, 'Christmas Day', '2027-12-24', 'Sat -> prev Fri'],
-    [2027, 'Boxing Day', '2027-12-27', 'Sun -> following Mon'],
+    [2025, 'Australia Day', '2025-01-27', 'Sun -> +1'],
+    [2030, 'Australia Day', '2030-01-28', 'Sat -> +2'],
+    [2026, 'ANZAC Day', '2026-04-27', 'Sat -> +2'],
+    [2027, 'ANZAC Day', '2027-04-26', 'Sun -> +1'],
   ])('%i %s resolves to %s (%s)', (year, name, resolved) => {
     expect(nameOn(calendar.calculate(year), resolved)).toBe(name);
   });
 });
 
-describe("AU calendar — New Year's Day cross-year-boundary roll (2028 Jan 1 is Saturday)", () => {
+describe("AU calendar — New Year's Day weekend roll (2028 Jan 1 is Saturday)", () => {
   const calendar = createAUCalendar();
 
-  it('rolls back into the PREVIOUS calendar date while still being returned by calculate(2028)', () => {
+  it('rolls forward to the following Monday, within the same year', () => {
     const dates2028 = calendar.calculate(2028);
-    expect(nameOn(dates2028, '2027-12-31')).toBe("New Year's Day");
-
-    const dates2027 = calendar.calculate(2027);
-    expect(nameOn(dates2027, '2027-01-01')).toBe("New Year's Day");
-
+    expect(nameOn(dates2028, '2028-01-03')).toBe("New Year's Day");
     expect(d('2028-01-01').dayOfWeek).toBe(6);
   });
 });
 
-describe('AU calendar — Christmas Day / Boxing Day roll collision (2026)', () => {
+describe('AU calendar — Christmas Day / Boxing Day weekend cascade (2027)', () => {
   const calendar = createAUCalendar();
 
-  it("Boxing Day (raw Dec 26, a Saturday) rolls back onto Christmas Day's raw Dec 25, producing two entries on the same date", () => {
-    const dates2026 = calendar.calculate(2026);
-    expect(dates2026).toHaveLength(9);
-    expect(namesOn(dates2026, '2026-12-25').sort()).toEqual(['Boxing Day', 'Christmas Day']);
+  it('Christmas Day (Sat) rolls to Monday and Boxing Day (Sun) rolls past it to Tuesday, avoiding a collision', () => {
+    const dates2027 = calendar.calculate(2027);
+    expect(dates2027).toHaveLength(9);
+    expect(nameOn(dates2027, '2027-12-27')).toBe('Christmas Day');
+    expect(nameOn(dates2027, '2027-12-28')).toBe('Boxing Day');
   });
 });
 
@@ -110,11 +142,10 @@ describe('AU calendar — scope boundary (no state-only holidays)', () => {
 describe('AU calendar — multi-year integration (2024-2028)', () => {
   const calendar = createAUCalendar();
 
-  it('has no two holidays sharing a resolved date, except the documented 2026 Christmas/Boxing Day collision', () => {
+  it('has no two holidays sharing a resolved date', () => {
     for (let year = 2024; year <= 2028; year++) {
       const dates = calendar.calculate(year).map((hd) => hd.date.toString());
-      const expectedUnique = year === 2026 ? dates.length - 1 : dates.length;
-      expect(new Set(dates).size).toBe(expectedUnique);
+      expect(new Set(dates).size).toBe(dates.length);
     }
   });
 
