@@ -42,15 +42,22 @@ export function auFixedHolidayRoll(date: Temporal.PlainDate): Temporal.PlainDate
  * calendar (`XASX`, tracked separately), which adds early closes on top of
  * it but no additional/different national holidays.
  *
- * Easter Saturday (not observed in WA/Tasmania) and ANZAC Day's
- * state-varying weekend-substitute convention are known, sourced exceptions
- * retained here deliberately, at parity with Java's
- * `AuHolidays.baseHolidays()` — not oversights. Java's own
- * `docs/calendars/AU.md` documents this as an explicit policy call: both are
- * genuine, state-backed public holidays somewhere in the country, so a
- * single national entry is kept rather than forking the list per state, even
- * though it overstates observance for some jurisdictions. See
- * `docs/calendars/AU.md` in this repo for the full rationale and sources.
+ * Easter Saturday (not observed in WA/Tasmania) is retained here
+ * deliberately, at parity with Java's `AuHolidays.baseHolidays()` — not an
+ * oversight. Java's own `docs/calendars/AU.md` documents this as an explicit
+ * policy call: it's a genuine, state-backed public holiday somewhere in the
+ * country, so a single national entry is kept rather than forking the list
+ * per state, even though it overstates observance for WA/Tasmania.
+ *
+ * ANZAC Day's `rollable: true` matches Java's `AuHolidays.baseHolidays()`
+ * exactly, but the state-varying weekend-substitute note on its
+ * `description` below is *not* a Java-documented policy call — Java's own
+ * ANZAC Day entry and docs carry no such caveat. The variance is real and
+ * independently sourced (see `docs/calendars/AU.md`'s Sources section), just
+ * not one Java itself models or discusses; it's tracked as its own gap in
+ * `docs/BUILD_SPEC.md` rather than folded into the Easter Saturday/King's
+ * Birthday Java-parity rationale. See `docs/calendars/AU.md` in this repo
+ * for the full rationale and sources.
  */
 export function createAUCalendar(): HolidayCalendar {
   return new HolidayCalendar({

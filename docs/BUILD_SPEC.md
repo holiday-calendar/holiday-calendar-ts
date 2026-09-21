@@ -171,6 +171,36 @@ Central-bank/settlement calendars (`USD`, `CAD`, `GBP`, `AUD`, `CHF`, `EUR`,
 not equities-exchange holidays — and should never be merged into either the
 national or the market-exchange calendar for the same country.
 
+### 2.1. `AU`'s known state-variance gap (deliberately deferred, not a bug)
+
+`createAUCalendar()` (`packages/western/src/calendars/au.ts`) includes three
+holidays where a single national convention overstates or understates actual
+observance for some Australian states/territories:
+
+- **Easter Saturday** — included nationally but not observed in Western
+  Australia or Tasmania.
+- **ANZAC Day's weekend-substitute roll** — `auFixedHolidayRoll` applies one
+  uniform roll, but whether a missed public holiday is granted when ANZAC
+  Day falls on a weekend actually differs by state/territory (see
+  `docs/calendars/AU.md` Sources).
+- **King's Birthday** — modeled only as the 2nd-Monday-in-June national
+  convention; Queensland (1st Monday in October) and Western Australia
+  (governor-set late-September/early-October date) are not separately
+  represented.
+
+`HolidayCalendar.calculate()` has no per-jurisdiction parameter, so none of
+these can be resolved without either forking `AU` per state/territory (a
+much larger modeling change) or accepting the majority-jurisdiction
+convention as-is. This is the same category of tradeoff as the `us.ts`
+national/market gap above, but is being tracked rather than fixed in this
+pass — Easter Saturday and King's Birthday's inclusion mirrors upstream
+`holiday-calendar-java`'s `AuHolidays.java` policy call exactly; the ANZAC
+Day roll variance is a TS-specific documented gap (not present in Java) with
+its own independent sourcing. See `docs/calendars/AU.md`'s "Notes of
+Interest" and "Sources" sections for the full rationale per holiday. No
+target fix is planned unless a future issue specifically requests
+per-state/territory `AU` modeling.
+
 ## 3. Western module expansion
 
 Target calendars, to reach Java's `holiday-calendar-western` parity, each as

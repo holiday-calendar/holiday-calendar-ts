@@ -56,10 +56,15 @@ holiday list by state.
 
 **ANZAC Day's weekend-substitute observance varies by state more than a
 single national roll rule suggests.** Whether a missed public holiday is
-granted when ANZAC Day falls on a weekend differs by state/territory. This
-codebase applies one national weekend-substitute convention
-(`auFixedHolidayRoll`) uniformly, the same tradeoff made for Easter Saturday
-and King's Birthday below.
+granted when ANZAC Day falls on a weekend differs by state/territory — e.g.
+in 2026, when ANZAC Day fell on Saturday April 25, NSW, WA, and the ACT
+declared a Monday April 27 substitute holiday while VIC, QLD, SA, TAS, and
+the NT did not (see Sources). This codebase applies one national
+weekend-substitute convention (`auFixedHolidayRoll`) uniformly, the same
+kind of majority-jurisdiction tradeoff made for Easter Saturday and King's
+Birthday below — but note this specific variance is independently sourced,
+**not** a policy call Java itself documents (unlike Easter Saturday and
+King's Birthday below); see the closing paragraph.
 
 **King's Birthday's date varies by state more than the single national entry
 suggests.** Most Australian states observe it on the 2nd Monday in June
@@ -76,9 +81,19 @@ Easter Saturday, ANZAC Day's roll behavior, and King's Birthday are all
 retained in this single national list specifically because each reflects a
 genuine, state-backed public holiday practice *somewhere* in the country —
 the tradeoff is a national calendar that overstates observance for any
-single state and understates the outlier dates/rules. This mirrors upstream
+single state and understates the outlier dates/rules.
+
+Easter Saturday and King's Birthday's inclusion mirrors upstream
 `holiday-calendar-java`'s `AuHolidays.java` and its own
-`docs/calendars/AU.md`, which document the identical policy call.
+`docs/calendars/AU.md`, which document the identical policy call for those
+two holidays specifically. ANZAC Day's weekend-substitute variance is
+**not** part of that upstream policy call — Java's `AuHolidays.java` gives
+ANZAC Day a plain, uncaveated entry and Java's own `docs/calendars/AU.md`
+never discusses it. The variance is real and independently sourced (see
+Sources below), but modeling it uniformly here is a gap specific to this
+port, tracked in `docs/BUILD_SPEC.md` alongside the same
+per-jurisdiction-modeling limitation for Easter Saturday and King's
+Birthday.
 
 ## Sources
 
@@ -90,3 +105,13 @@ single state and understates the outlier dates/rules. This mirrors upstream
 - No single official Australian federal government primary source
   enumerating all state-level public holiday variations was captured with a
   stable citation URL in this pass
+- ANZAC Day's weekend-substitute variance (NSW/WA/ACT declaring a Monday
+  substitute when ANZAC Day falls on a weekend, vs. VIC/QLD/SA/TAS/NT not
+  doing so) is corroborated by
+  [SmartCompany](https://www.smartcompany.com.au/retail/anzac-day-2026-public-holiday-monday-which-states-australia/),
+  [ABC News](https://www.abc.net.au/news/2026-01-26/how-public-holidays-work-annual-leave/106207590),
+  [The Conversation](https://theconversation.com/this-anzac-day-falls-on-a-saturday-and-these-states-will-be-getting-an-extra-public-holiday-279858),
+  and [FairWork Mate](https://fairworkmate.com.au/blog/anzac-day-2026-saturday-public-holiday),
+  using the 2026 occurrence (ANZAC Day on Saturday April 25) as the worked
+  example. This is independent of, and not documented by, upstream
+  `holiday-calendar-java`.
