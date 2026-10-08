@@ -201,6 +201,21 @@ Interest" and "Sources" sections for the full rationale per holiday. No
 target fix is planned unless a future issue specifically requests
 per-state/territory `AU` modeling.
 
+### 2.2. `FR`'s intentional deviation from Java (no weekend roll)
+
+`createFRCalendar()` (`packages/western/src/calendars/fr.ts`) uses
+`DateRolls.noRoll()` with all 8 fixed holidays `rollable: false`. This
+**deliberately differs** from `holiday-calendar-java` v2.1.0's
+`HolidayCalendarServiceFR`, which uses `previousFridayOrFollowingMonday()`
+with the 8 fixed holidays `rollable(true)` (see Java's `docs/calendars/FR.md`).
+
+Rationale: France grants no statutory substitute holiday when a public
+holiday falls on a weekly rest day ("jour de repos habituel"), absent a more
+favorable collective agreement (Urssaf; Cour de Cassation). Java's roll
+reflects an assumption that the US-style observance applies uniformly, not
+French practice. Tracked in issue #57. Do not "restore parity" by
+re-adding the roll; the Java behavior should be reported upstream instead.
+
 ## 3. Western module expansion
 
 Target calendars, to reach Java's `holiday-calendar-western` parity, each as
