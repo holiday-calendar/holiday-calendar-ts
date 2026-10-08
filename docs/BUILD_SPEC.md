@@ -233,7 +233,10 @@ pattern, with observances grouped by domain under `observances/<domain-or-region
   Java v2.1.0 (issues #239/#240), not pre-existing; verify against live
   Java source rather than assuming either is a stub.
 - `FR` (national) / `XPAR` (Euronext Paris) / `EUR` (TARGET2)
-- `AU` (national) / `XASX` (Australian Securities Exchange) / `AUD` (RBA)
+- `AU` (national) / `XASX` (Australian Securities Exchange) / `AUD` (RBA) —
+  `AUD` is implemented (issue #9); it deliberately reuses `AU`'s forward roll
+  rather than Java's `previousFridayOrFollowingMonday()` (see
+  `docs/calendars/AUD.md`)
 
 Each new country's observances that are Easter-derived should reuse the
 existing `observances/christian/goodFriday.ts` pattern (built via

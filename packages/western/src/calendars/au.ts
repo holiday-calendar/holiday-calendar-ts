@@ -1,9 +1,9 @@
-import { HolidayCalendar, fixedHoliday, floatingHoliday, relativeObservance, Temporal } from '@holiday-calendar/core';
+import { HolidayCalendar, Temporal } from '@holiday-calendar/core';
 import type { HolidayCalendarProvider } from '@holiday-calendar/core';
-import { westernEaster } from '../observances/easter.js';
-import { goodFriday } from '../observances/christian/goodFriday.js';
-import { easterMonday } from '../observances/christian/easterMonday.js';
-import { kingsBirthday } from '../observances/au/kingsBirthday.js';
+import {
+  auNewYearsDay, auAustraliaDay, auGoodFriday, auEasterSaturday, auEasterMonday,
+  auAnzacDay, auKingsBirthday, auChristmasDay, auBoxingDay,
+} from './auHolidays.js';
 
 const CODE = 'AU';
 const NAME = 'Australia National Holidays';
@@ -66,51 +66,15 @@ export function createAUCalendar(): HolidayCalendar {
     dateRoll: auFixedHolidayRoll,
     weekendDays: HolidayCalendar.STANDARD_WEEKEND,
     holidays: [
-      fixedHoliday({
-        name: "New Year's Day",
-        description: 'First day of new year in the Common Era (CE)',
-        month: 1, day: 1, rollable: true,
-      }),
-      fixedHoliday({
-        name: 'Australia Day',
-        description: 'Commemoration of the 1788 arrival of the First Fleet at Port Jackson',
-        month: 1, day: 26, rollable: true,
-      }),
-      floatingHoliday({
-        name: 'Good Friday',
-        description: 'Friday before Easter Sunday',
-        observance: goodFriday(westernEaster), rollable: false,
-      }),
-      floatingHoliday({
-        name: 'Easter Saturday',
-        description: 'Day after Good Friday; not observed in Western Australia or Tasmania',
-        observance: relativeObservance(goodFriday(westernEaster), 1), rollable: false,
-      }),
-      floatingHoliday({
-        name: 'Easter Monday',
-        description: 'Monday after Easter Sunday',
-        observance: easterMonday(westernEaster), rollable: false,
-      }),
-      fixedHoliday({
-        name: 'ANZAC Day',
-        description: 'Commemoration of the Australian and New Zealand Army Corps; whether a weekend substitute is observed varies by state/territory',
-        month: 4, day: 25, rollable: true,
-      }),
-      floatingHoliday({
-        name: "King's Birthday",
-        description: "King's Birthday (2nd Monday in June); Queensland uses the 1st Monday in October and Western Australia uses a late-September date",
-        observance: kingsBirthday, rollable: false,
-      }),
-      fixedHoliday({
-        name: 'Christmas Day',
-        description: 'Celebration of traditional Christmas holiday',
-        month: 12, day: 25, rollable: true,
-      }),
-      fixedHoliday({
-        name: 'Boxing Day',
-        description: 'Day after Christmas',
-        month: 12, day: 26, rollable: true,
-      }),
+      auNewYearsDay,
+      auAustraliaDay,
+      auGoodFriday,
+      auEasterSaturday,
+      auEasterMonday,
+      auAnzacDay,
+      auKingsBirthday,
+      auChristmasDay,
+      auBoxingDay,
     ],
   });
 }

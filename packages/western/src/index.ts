@@ -6,6 +6,7 @@ export { createFRCalendar, frProvider } from './calendars/fr.js';
 export { createCHCalendar, chProvider } from './calendars/ch.js';
 export { createDECalendar, deProvider } from './calendars/de.js';
 export { createAUCalendar, auProvider } from './calendars/au.js';
+export { createAUDCalendar, audProvider } from './calendars/aud.js';
 
 // Easter observances
 export { westernEaster, orthodoxEaster, ORTHODOX_MIN_YEAR, ORTHODOX_MAX_YEAR } from './observances/easter.js';
@@ -45,6 +46,7 @@ export { summerBankHoliday } from './observances/uk/summerBankHoliday.js';
 
 // AU observances
 export { kingsBirthday } from './observances/au/kingsBirthday.js';
+export { nswBankHoliday } from './observances/au/bankHoliday.js';
 
 // Utilities (for use by calendar implementors)
 export { nthWeekdayOfMonth, lastWeekdayOfMonth, weekdayImmediatelyBefore } from './observances/utils.js';

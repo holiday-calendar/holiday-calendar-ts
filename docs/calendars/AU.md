@@ -2,9 +2,10 @@
 
 - **Standard:** ISO 3166-1 alpha-2 `AU`
 - **Category:** National
-- **Sibling calendars:** `XASX` (Australian Securities Exchange) and `AUD`
-  (Reserve Bank of Australia) are planned but not yet implemented in this
-  repo (see `docs/BUILD_SPEC.md` §2/§3). Upstream Java shares all 9 holidays
+- **Sibling calendars:** `AUD` (Reserve Bank of Australia, see
+  [AUD.md](./AUD.md)) is implemented; `XASX` (Australian Securities
+  Exchange) is planned but not yet implemented in this repo (see
+  `docs/BUILD_SPEC.md` §2/§3). Upstream Java shares all 9 holidays
   below between `AU` and `XASX` via a common `AuHolidays` factory; `XASX`
   only adds Christmas Eve/New Year's Eve early closes on top. `AUD`
   independently duplicates most of the same holidays but omits Easter
