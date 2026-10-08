@@ -18,7 +18,7 @@
   fixed holidays `rollable(true)`. Germany observes no substitute holiday
   when a public holiday falls on a weekend, so every fixed holiday stays on
   its calendar date, Saturday or Sunday included. See Notes of Interest and
-  `docs/BUILD_SPEC.md` §2.3 (issue #55).
+  `docs/BUILD_SPEC.md` §2.4 (issue #55).
 - **Rollability exceptions:** None — all 9 holidays are `rollable: false`.
   The four floating holidays (Good Friday, Easter Monday, Ascension Day,
   Whit Monday) are weekday-anchored; the 5 fixed holidays are non-rollable by
@@ -57,7 +57,7 @@ For example, German Unity Day 2021 (Sunday October 3) had no Monday-in-lieu,
 and in 2026 Boxing Day (Saturday December 26) stays on that date rather than
 colliding with Christmas Day. Do not "restore parity" by re-adding the roll;
 the Java behavior should be reported upstream instead (see
-`docs/BUILD_SPEC.md` §2.3).
+`docs/BUILD_SPEC.md` §2.4).
 
 **Länder (state) holidays are not modeled.** Germany observes additional
 public holidays at the individual state level (e.g. Epiphany, Corpus Christi,
