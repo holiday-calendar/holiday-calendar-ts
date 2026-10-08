@@ -12,13 +12,13 @@ export function createFRCalendar(): HolidayCalendar {
   return new HolidayCalendar({
     code: CODE,
     name: NAME,
-    dateRoll: DateRolls.previousFridayOrFollowingMonday(),
+    dateRoll: DateRolls.noRoll(),
     weekendDays: HolidayCalendar.STANDARD_WEEKEND,
     holidays: [
       fixedHoliday({
         name: "New Year's Day",
         description: 'First day of new year in the Common Era (CE)',
-        month: 1, day: 1, rollable: true,
+        month: 1, day: 1, rollable: false,
       }),
       floatingHoliday({
         name: 'Easter Monday',
@@ -28,12 +28,12 @@ export function createFRCalendar(): HolidayCalendar {
       fixedHoliday({
         name: 'Labour Day',
         description: 'Celebration of workers and labour',
-        month: 5, day: 1, rollable: true,
+        month: 5, day: 1, rollable: false,
       }),
       fixedHoliday({
         name: 'Victory in Europe Day',
         description: 'Commemoration of the Allied victory over Nazi Germany in 1945',
-        month: 5, day: 8, rollable: true,
+        month: 5, day: 8, rollable: false,
       }),
       floatingHoliday({
         name: 'Ascension Day',
@@ -48,27 +48,27 @@ export function createFRCalendar(): HolidayCalendar {
       fixedHoliday({
         name: 'Bastille Day',
         description: 'Commemoration of the storming of the Bastille in 1789',
-        month: 7, day: 14, rollable: true,
+        month: 7, day: 14, rollable: false,
       }),
       fixedHoliday({
         name: 'Assumption Day',
         description: 'Commemoration of the assumption of the Virgin Mary into heaven',
-        month: 8, day: 15, rollable: true,
+        month: 8, day: 15, rollable: false,
       }),
       fixedHoliday({
         name: "All Saints' Day",
         description: 'Commemoration of all Christian saints',
-        month: 11, day: 1, rollable: true,
+        month: 11, day: 1, rollable: false,
       }),
       fixedHoliday({
         name: 'Armistice Day',
         description: 'Commemoration of the armistice ending the First World War in 1918',
-        month: 11, day: 11, rollable: true,
+        month: 11, day: 11, rollable: false,
       }),
       fixedHoliday({
         name: 'Christmas Day',
         description: 'Commemoration of the birth of Jesus Christ',
-        month: 12, day: 25, rollable: true,
+        month: 12, day: 25, rollable: false,
       }),
     ],
   });
