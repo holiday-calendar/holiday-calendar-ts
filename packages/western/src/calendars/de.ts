@@ -13,13 +13,13 @@ export function createDECalendar(): HolidayCalendar {
   return new HolidayCalendar({
     code: CODE,
     name: NAME,
-    dateRoll: DateRolls.previousFridayOrFollowingMonday(),
+    dateRoll: DateRolls.noRoll(),
     weekendDays: HolidayCalendar.STANDARD_WEEKEND,
     holidays: [
       fixedHoliday({
         name: "New Year's Day",
         description: 'First day of new year in the Common Era (CE)',
-        month: 1, day: 1, rollable: true,
+        month: 1, day: 1, rollable: false,
       }),
       floatingHoliday({
         name: 'Good Friday',
@@ -34,7 +34,7 @@ export function createDECalendar(): HolidayCalendar {
       fixedHoliday({
         name: 'Labour Day',
         description: "International Workers' Day",
-        month: 5, day: 1, rollable: true,
+        month: 5, day: 1, rollable: false,
       }),
       floatingHoliday({
         name: 'Ascension Day',
@@ -49,17 +49,17 @@ export function createDECalendar(): HolidayCalendar {
       fixedHoliday({
         name: 'German Unity Day',
         description: 'German Unity Day',
-        month: 10, day: 3, rollable: true,
+        month: 10, day: 3, rollable: false,
       }),
       fixedHoliday({
         name: 'Christmas Day',
         description: 'Celebration of traditional Christmas holiday',
-        month: 12, day: 25, rollable: true,
+        month: 12, day: 25, rollable: false,
       }),
       fixedHoliday({
         name: 'Boxing Day',
         description: 'Day after Christmas',
-        month: 12, day: 26, rollable: true,
+        month: 12, day: 26, rollable: false,
       }),
     ],
   });
