@@ -23,7 +23,7 @@ describe('FR calendar — basic wiring', () => {
   });
 });
 
-describe('FR calendar — exact holiday set, non-roll-heavy year (2026)', () => {
+describe('FR calendar — exact holiday set (2026)', () => {
   const calendar = createFRCalendar();
 
   it('matches all 11 [name, date] pairs in chronological order', () => {
@@ -36,8 +36,8 @@ describe('FR calendar — exact holiday set, non-roll-heavy year (2026)', () => 
       ['Ascension Day', '2026-05-14'],
       ['Whit Monday', '2026-05-25'],
       ['Bastille Day', '2026-07-14'],
-      ['Assumption Day', '2026-08-14'], // Sat -> rolls to previous Friday
-      ["All Saints' Day", '2026-11-02'], // Sun -> rolls to following Monday
+      ['Assumption Day', '2026-08-15'], // Sat, no roll
+      ["All Saints' Day", '2026-11-01'], // Sun, no roll
       ['Armistice Day', '2026-11-11'],
       ['Christmas Day', '2026-12-25'],
     ];
@@ -49,53 +49,41 @@ describe('FR calendar — exact holiday set, non-roll-heavy year (2026)', () => 
   });
 });
 
-describe('FR calendar — fixed-holiday roll regression (Sat -> prev Friday, Sun -> following Monday)', () => {
+describe('FR calendar — no weekend roll (France grants no substitute holiday)', () => {
   const calendar = createFRCalendar();
 
-  // Each of the 8 fixed holidays hits the weekend at least once in this
-  // window (confirmed by direct day-of-week check across 2024-2028); not
-  // every holiday hits both Saturday AND Sunday in this 5-year span, since
-  // several share day-of-week offsets that are multiples of 7 apart. The
-  // roll function itself is exhaustively unit-tested in isolation in
-  // packages/core/src/function/DateRolls.test.ts.
+  // France provides no statutory compensation when a public holiday falls on
+  // a weekly rest day, so every fixed holiday stays on its calendar date,
+  // Saturday or Sunday included.
   it.each([
-    [2028, "New Year's Day", '2027-12-31', 'Sat -> prev Fri (cross-year boundary, see dedicated test below)'],
-    [2027, 'Labour Day', '2027-04-30', 'Sat -> prev Fri'],
-    [2028, 'Labour Day', '2028-05-01', 'Mon, no roll'],
-    [2027, 'Victory in Europe Day', '2027-05-07', 'Sat -> prev Fri'],
-    [2024, 'Bastille Day', '2024-07-15', 'Sun -> following Mon'],
-    [2026, 'Assumption Day', '2026-08-14', 'Sat -> prev Fri'],
-    [2027, 'Assumption Day', '2027-08-16', 'Sun -> following Mon'],
-    [2025, "All Saints' Day", '2025-10-31', 'Sat -> prev Fri'],
-    [2026, "All Saints' Day", '2026-11-02', 'Sun -> following Mon'],
-    [2028, 'Armistice Day', '2028-11-10', 'Sat -> prev Fri'],
-    [2027, 'Christmas Day', '2027-12-24', 'Sat -> prev Fri'],
-  ])('%i %s resolves to %s (%s)', (year, name, resolved) => {
-    expect(nameOn(calendar.calculate(year), resolved)).toBe(name);
+    [2028, "New Year's Day", '2028-01-01'], // Sat
+    [2027, 'Labour Day', '2027-05-01'], // Sat
+    [2027, 'Victory in Europe Day', '2027-05-08'], // Sat
+    [2024, 'Bastille Day', '2024-07-14'], // Sun
+    [2026, 'Assumption Day', '2026-08-15'], // Sat
+    [2027, 'Assumption Day', '2027-08-15'], // Sun
+    [2025, "All Saints' Day", '2025-11-01'], // Sat
+    [2026, "All Saints' Day", '2026-11-01'], // Sun
+    [2028, 'Armistice Day', '2028-11-11'], // Sat
+    [2027, 'Christmas Day', '2027-12-25'], // Sat
+  ])('%i %s stays on %s', (year, name, iso) => {
+    expect(nameOn(calendar.calculate(year), iso)).toBe(name);
+    expect(d(iso).dayOfWeek).toBeGreaterThanOrEqual(6);
   });
-});
 
-describe("FR calendar — New Year's Day cross-year-boundary roll (2028 Jan 1 is Saturday)", () => {
-  const calendar = createFRCalendar();
-
-  it('rolls back into the PREVIOUS calendar date while still being returned by calculate(2028)', () => {
-    // calculate(year) computes the raw date for `year`, then rolls it — it
-    // does NOT re-bucket the result back into [year-01-01, year-12-31]
-    // (verified against HolidayCalendar.ts's resolve()/calculate()). So
-    // 2028's New Year's Day (raw 2028-01-01, a Saturday) rolls to
-    // 2027-12-31 and appears in calculate(2028)'s result, NOT calculate(2027).
-    const dates2028 = calendar.calculate(2028);
-    expect(nameOn(dates2028, '2027-12-31')).toBe("New Year's Day");
-
-    // 2027's OWN New Year's Day (raw 2027-01-01, a Friday, no roll needed)
-    // is a separate, independently-computed entry — calculate(year) always
-    // resolves that year's own holiday instances, so 2027 having its own
-    // Jan 1 entry does not contradict 2028's rolled entry landing on Dec 31.
-    const dates2027 = calendar.calculate(2027);
-    expect(nameOn(dates2027, '2027-01-01')).toBe("New Year's Day");
-
-    // Sanity: raw Jan 1 2028 is indeed a Saturday.
-    expect(d('2028-01-01').dayOfWeek).toBe(6);
+  it('never returns a fixed holiday on a different date than its calendar date, 2024-2028', () => {
+    const fixed: Array<[string, number, number]> = [
+      ["New Year's Day", 1, 1], ['Labour Day', 5, 1], ['Victory in Europe Day', 5, 8],
+      ['Bastille Day', 7, 14], ['Assumption Day', 8, 15], ["All Saints' Day", 11, 1],
+      ['Armistice Day', 11, 11], ['Christmas Day', 12, 25],
+    ];
+    for (let year = 2024; year <= 2028; year++) {
+      const result = calendar.calculate(year);
+      for (const [name, month, day] of fixed) {
+        const hd = result.find((r) => r.holiday.name === name);
+        expect(hd?.date.equals(Temporal.PlainDate.from({ year, month, day }))).toBe(true);
+      }
+    }
   });
 });
 
