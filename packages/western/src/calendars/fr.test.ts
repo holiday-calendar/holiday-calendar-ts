@@ -71,20 +71,20 @@ describe('FR calendar — no weekend roll (France grants no substitute holiday)'
     expect(d(iso).dayOfWeek).toBeGreaterThanOrEqual(6);
   });
 
-  it('never returns a fixed holiday on a different date than its calendar date, 2024-2028', () => {
-    const fixed: Array<[string, number, number]> = [
-      ["New Year's Day", 1, 1], ['Labour Day', 5, 1], ['Victory in Europe Day', 5, 8],
-      ['Bastille Day', 7, 14], ['Assumption Day', 8, 15], ["All Saints' Day", 11, 1],
-      ['Armistice Day', 11, 11], ['Christmas Day', 12, 25],
-    ];
-    for (let year = 2024; year <= 2028; year++) {
-      const result = calendar.calculate(year);
-      for (const [name, month, day] of fixed) {
-        const hd = result.find((r) => r.holiday.name === name);
-        expect(hd?.date.equals(Temporal.PlainDate.from({ year, month, day }))).toBe(true);
-      }
-    }
-  });
+  const fixed: Array<[string, number, number]> = [
+    ["New Year's Day", 1, 1], ['Labour Day', 5, 1], ['Victory in Europe Day', 5, 8],
+    ['Bastille Day', 7, 14], ['Assumption Day', 8, 15], ["All Saints' Day", 11, 1],
+    ['Armistice Day', 11, 11], ['Christmas Day', 12, 25],
+  ];
+  const years = [2024, 2025, 2026, 2027, 2028];
+
+  it.each(years.flatMap((year) => fixed.map(([name, month, day]) => [year, name, month, day] as const)))(
+    '%i %s stays on its calendar date',
+    (year, name, month, day) => {
+      const hd = calendar.calculate(year).find((r) => r.holiday.name === name);
+      expect(hd?.date.toString()).toBe(Temporal.PlainDate.from({ year, month, day }).toString());
+    },
+  );
 });
 
 describe('FR calendar — scope boundary (no Good Friday)', () => {
