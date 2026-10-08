@@ -1,14 +1,20 @@
-import { HolidayCalendar, fixedHoliday, floatingHoliday } from '@holiday-calendar/core';
+import { HolidayCalendar, floatingHoliday } from '@holiday-calendar/core';
 import type { HolidayCalendarProvider } from '@holiday-calendar/core';
-import { westernEaster } from '../observances/easter.js';
-import { goodFriday } from '../observances/christian/goodFriday.js';
-import { easterMonday } from '../observances/christian/easterMonday.js';
-import { kingsBirthday } from '../observances/au/kingsBirthday.js';
 import { nswBankHoliday } from '../observances/au/bankHoliday.js';
 import { auFixedHolidayRoll } from './au.js';
+import {
+  auNewYearsDay, auAustraliaDay, auGoodFriday, auEasterMonday,
+  auAnzacDay, auKingsBirthday, auChristmasDay, auBoxingDay,
+} from './auHolidays.js';
 
 const CODE = 'AUD';
 const NAME = 'Australia (RBA) Holidays';
+
+const bankHoliday = floatingHoliday({
+  name: 'Bank Holiday',
+  description: 'NSW Bank Holiday (1st Monday in August)',
+  observance: nswBankHoliday, rollable: false,
+});
 
 /**
  * Australia (RBA) settlement holiday calendar — a central-bank/settlement
@@ -32,6 +38,10 @@ const NAME = 'Australia (RBA) Holidays';
  * merging this calendar with another carrying those dates would compose
  * rolls — settlement calendars are not meant to be merged with national ones.
  *
+ * Shared holiday definitions (and their descriptions, which carry AU's
+ * state-variance notes rather than Java's terser AUD text) live in
+ * `auHolidays.ts`.
+ *
  * `calculate()` does not dedupe, so ANZAC Day and Easter Monday both appear
  * on one date in years they coincide (2038-04-26 after rolling).
  */
@@ -42,51 +52,15 @@ export function createAUDCalendar(): HolidayCalendar {
     dateRoll: auFixedHolidayRoll,
     weekendDays: HolidayCalendar.STANDARD_WEEKEND,
     holidays: [
-      fixedHoliday({
-        name: "New Year's Day",
-        description: 'First day of new year in the Common Era (CE)',
-        month: 1, day: 1, rollable: true,
-      }),
-      fixedHoliday({
-        name: 'Australia Day',
-        description: 'Australia Day',
-        month: 1, day: 26, rollable: true,
-      }),
-      floatingHoliday({
-        name: 'Good Friday',
-        description: 'Friday before Easter Sunday',
-        observance: goodFriday(westernEaster), rollable: false,
-      }),
-      floatingHoliday({
-        name: 'Easter Monday',
-        description: 'Monday after Easter Sunday',
-        observance: easterMonday(westernEaster), rollable: false,
-      }),
-      fixedHoliday({
-        name: 'ANZAC Day',
-        description: 'ANZAC Day',
-        month: 4, day: 25, rollable: true,
-      }),
-      floatingHoliday({
-        name: "King's Birthday",
-        description: "King's Birthday (RBA; 2nd Monday in June)",
-        observance: kingsBirthday, rollable: false,
-      }),
-      floatingHoliday({
-        name: 'Bank Holiday',
-        description: 'NSW Bank Holiday (1st Monday in August)',
-        observance: nswBankHoliday, rollable: false,
-      }),
-      fixedHoliday({
-        name: 'Christmas Day',
-        description: 'Celebration of traditional Christmas holiday',
-        month: 12, day: 25, rollable: true,
-      }),
-      fixedHoliday({
-        name: 'Boxing Day',
-        description: 'Day after Christmas',
-        month: 12, day: 26, rollable: true,
-      }),
+      auNewYearsDay,
+      auAustraliaDay,
+      auGoodFriday,
+      auEasterMonday,
+      auAnzacDay,
+      auKingsBirthday,
+      bankHoliday,
+      auChristmasDay,
+      auBoxingDay,
     ],
   });
 }
