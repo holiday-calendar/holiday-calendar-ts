@@ -25,7 +25,7 @@ describe('DE calendar — basic wiring', () => {
   });
 });
 
-describe('DE calendar — exact holiday set, non-roll-heavy year (2024)', () => {
+describe('DE calendar — exact holiday set (2024)', () => {
   const calendar = createDECalendar();
 
   it('matches all 9 [name, date] pairs in chronological order', () => {
@@ -49,63 +49,43 @@ describe('DE calendar — exact holiday set, non-roll-heavy year (2024)', () => 
   });
 });
 
-describe('DE calendar — fixed-holiday roll regression (Sat -> prev Friday, Sun -> following Monday)', () => {
+describe('DE calendar — no weekend roll (Germany grants no substitute holiday)', () => {
   const calendar = createDECalendar();
 
-  // Each of the 5 fixed holidays hits the weekend at least once in this
-  // window (confirmed by direct day-of-week check across 2024-2028); not
-  // every holiday hits both Saturday AND Sunday in this 5-year span. The
-  // roll function itself is exhaustively unit-tested in isolation in
-  // packages/core/src/function/DateRolls.test.ts. Boxing Day's own Saturday
-  // instance (2026) is deliberately excluded here — it collides with
-  // Christmas Day and is covered by the dedicated collision test below.
+  // Germany observes no substitute day when a public holiday falls on a
+  // weekend, so every fixed holiday stays on its calendar date, Saturday or
+  // Sunday included.
   it.each([
-    [2028, "New Year's Day", '2027-12-31', 'Sat -> prev Fri (cross-year boundary, see dedicated test below)'],
-    [2027, 'Labour Day', '2027-04-30', 'Sat -> prev Fri'],
-    [2026, 'German Unity Day', '2026-10-02', 'Sat -> prev Fri'],
-    [2027, 'German Unity Day', '2027-10-04', 'Sun -> following Mon'],
-    [2027, 'Christmas Day', '2027-12-24', 'Sat -> prev Fri'],
-    [2027, 'Boxing Day', '2027-12-27', 'Sun -> following Mon'],
-  ])('%i %s resolves to %s (%s)', (year, name, resolved) => {
-    expect(nameOn(calendar.calculate(year), resolved)).toBe(name);
+    [2028, "New Year's Day", '2028-01-01'], // Sat
+    [2027, 'Labour Day', '2027-05-01'], // Sat
+    [2021, 'German Unity Day', '2021-10-03'], // Sun, no Monday-in-lieu
+    [2026, 'German Unity Day', '2026-10-03'], // Sat
+    [2027, 'German Unity Day', '2027-10-03'], // Sun
+    [2027, 'Christmas Day', '2027-12-25'], // Sat
+    [2027, 'Boxing Day', '2027-12-26'], // Sun
+  ])('%i %s stays on %s', (year, name, iso) => {
+    expect(nameOn(calendar.calculate(year), iso)).toBe(name);
+    expect(d(iso).dayOfWeek).toBeGreaterThanOrEqual(6);
   });
-});
 
-describe("DE calendar — New Year's Day cross-year-boundary roll (2028 Jan 1 is Saturday)", () => {
-  const calendar = createDECalendar();
-
-  it('rolls back into the PREVIOUS calendar date while still being returned by calculate(2028)', () => {
-    // calculate(year) computes the raw date for `year`, then rolls it — it
-    // does NOT re-bucket the result back into [year-01-01, year-12-31]
-    // (verified against HolidayCalendar.ts's resolve()/calculate()). So
-    // 2028's New Year's Day (raw 2028-01-01, a Saturday) rolls to
-    // 2027-12-31 and appears in calculate(2028)'s result, NOT calculate(2027).
-    const dates2028 = calendar.calculate(2028);
-    expect(nameOn(dates2028, '2027-12-31')).toBe("New Year's Day");
-
-    // 2027's OWN New Year's Day (raw 2027-01-01, a Friday, no roll needed)
-    // is a separate, independently-computed entry.
-    const dates2027 = calendar.calculate(2027);
-    expect(nameOn(dates2027, '2027-01-01')).toBe("New Year's Day");
-
-    // Sanity: raw Jan 1 2028 is indeed a Saturday.
-    expect(d('2028-01-01').dayOfWeek).toBe(6);
-  });
-});
-
-describe('DE calendar — Christmas Day / Boxing Day roll collision (2026)', () => {
-  const calendar = createDECalendar();
-
-  it('Boxing Day (raw Dec 26, a Saturday) rolls back onto Christmas Day\'s raw Dec 25, producing two entries on the same date', () => {
-    // Each fixed holiday's roll is computed independently of its neighbors
-    // (HolidayCalendar.resolve() applies dateRoll per-holiday, not
-    // calendar-wide), so an adjacent-day pair can collapse onto the same
-    // resolved date in a year where the roll happens to land them together.
-    // This is expected behavior, not a bug — it mirrors the upstream Java
-    // DE calendar, which uses the same per-holiday roll rule.
+  it('keeps Christmas Day and Boxing Day on separate dates in 2026 (Dec 26 is a Saturday)', () => {
     const dates2026 = calendar.calculate(2026);
-    expect(dates2026).toHaveLength(9);
-    expect(namesOn(dates2026, '2026-12-25').sort()).toEqual(['Boxing Day', 'Christmas Day']);
+    expect(namesOn(dates2026, '2026-12-25')).toEqual(['Christmas Day']);
+    expect(namesOn(dates2026, '2026-12-26')).toEqual(['Boxing Day']);
+  });
+
+  it('never returns a fixed holiday on a different date than its calendar date, 2024-2028', () => {
+    const fixed: Array<[string, number, number]> = [
+      ["New Year's Day", 1, 1], ['Labour Day', 5, 1], ['German Unity Day', 10, 3],
+      ['Christmas Day', 12, 25], ['Boxing Day', 12, 26],
+    ];
+    for (let year = 2024; year <= 2028; year++) {
+      const result = calendar.calculate(year);
+      for (const [name, month, day] of fixed) {
+        const hd = result.find((r) => r.holiday.name === name);
+        expect(hd?.date.equals(Temporal.PlainDate.from({ year, month, day }))).toBe(true);
+      }
+    }
   });
 });
 
@@ -122,11 +102,10 @@ describe('DE calendar — scope boundary (no Xetra-only market closures)', () =>
 describe('DE calendar — multi-year integration (2024-2028)', () => {
   const calendar = createDECalendar();
 
-  it('has no two holidays sharing a resolved date, except the documented 2026 Christmas/Boxing Day collision', () => {
+  it('has no two holidays sharing a resolved date', () => {
     for (let year = 2024; year <= 2028; year++) {
       const dates = calendar.calculate(year).map((hd) => hd.date.toString());
-      const expectedUnique = year === 2026 ? dates.length - 1 : dates.length;
-      expect(new Set(dates).size).toBe(expectedUnique);
+      expect(new Set(dates).size).toBe(dates.length);
     }
   });
 
