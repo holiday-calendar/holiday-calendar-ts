@@ -17,18 +17,24 @@ const NAME = 'Switzerland National Holidays';
  * majority-cantonal convention rather than a uniform federal statute — for
  * example, Good Friday is not observed in Ticino or Valais. This calendar
  * models the common national convention, not a per-canton breakdown.
+ *
+ * No weekend roll: Switzerland grants no federal substitute day when a
+ * public holiday falls on a Saturday or Sunday, so every fixed holiday stays
+ * on its calendar date. This deliberately differs from holiday-calendar-java
+ * v2.1.0, which uses previousFridayOrFollowingMonday(); do not restore it
+ * (see docs/BUILD_SPEC.md §2.3, issue #56).
  */
 export function createCHCalendar(): HolidayCalendar {
   return new HolidayCalendar({
     code: CODE,
     name: NAME,
-    dateRoll: DateRolls.previousFridayOrFollowingMonday(),
+    dateRoll: DateRolls.noRoll(),
     weekendDays: HolidayCalendar.STANDARD_WEEKEND,
     holidays: [
       fixedHoliday({
         name: "New Year's Day",
         description: 'First day of new year in the Common Era (CE)',
-        month: 1, day: 1, rollable: true,
+        month: 1, day: 1, rollable: false,
       }),
       floatingHoliday({
         name: 'Good Friday',
@@ -43,7 +49,7 @@ export function createCHCalendar(): HolidayCalendar {
       fixedHoliday({
         name: 'Labour Day',
         description: "International Workers' Day",
-        month: 5, day: 1, rollable: true,
+        month: 5, day: 1, rollable: false,
       }),
       floatingHoliday({
         name: 'Ascension Day',
@@ -58,17 +64,17 @@ export function createCHCalendar(): HolidayCalendar {
       fixedHoliday({
         name: 'Swiss National Day',
         description: 'Date of the Federal Charter of 1291',
-        month: 8, day: 1, rollable: true,
+        month: 8, day: 1, rollable: false,
       }),
       fixedHoliday({
         name: 'Christmas Day',
         description: 'Celebration of traditional Christmas holiday',
-        month: 12, day: 25, rollable: true,
+        month: 12, day: 25, rollable: false,
       }),
       fixedHoliday({
         name: 'Boxing Day',
         description: 'Day after Christmas',
-        month: 12, day: 26, rollable: true,
+        month: 12, day: 26, rollable: false,
       }),
     ],
   });

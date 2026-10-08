@@ -216,6 +216,20 @@ reflects an assumption that the US-style observance applies uniformly, not
 French practice. Tracked in issue #57. Do not "restore parity" by
 re-adding the roll; the Java behavior should be reported upstream instead.
 
+### 2.3. `CH`'s intentional deviation from Java (no weekend roll)
+
+`createCHCalendar()` (`packages/western/src/calendars/ch.ts`) uses
+`DateRolls.noRoll()` with all 5 fixed holidays `rollable: false`. This
+**deliberately differs** from `holiday-calendar-java` v2.1.0's
+`HolidayCalendarServiceCH`, which uses `previousFridayOrFollowingMonday()`
+with the 5 fixed holidays `rollable(true)` (see Java's `docs/calendars/CH.md`).
+
+Rationale: Switzerland provides no federal-law substitute weekday when a
+public holiday falls on a Saturday or Sunday (ch.ch); any compensation is a
+cantonal or employer-level arrangement, not a national-calendar rule. Tracked
+in issue #56. Do not "restore parity" by re-adding the roll; the Java
+behavior should be reported upstream instead.
+
 ## 3. Western module expansion
 
 Target calendars, to reach Java's `holiday-calendar-western` parity, each as
