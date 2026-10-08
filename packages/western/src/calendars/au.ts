@@ -18,7 +18,7 @@ const NAME = 'Australia National Holidays';
  * and state government public holiday calendars, e.g. New Year's Day 2028
  * -> Mon Jan 3, Christmas/Boxing Day 2021 -> Mon Dec 27 / Tue Dec 28), which
  * shifts forward on both Saturday and Sunday. This is deliberately NOT
- * DateRolls.previousFridayOrFollowingMonday() (used by US/CH), whose
+ * DateRolls.previousFridayOrFollowingMonday() (used by US), whose
  * backward Saturday roll does not match Australian practice.
  *
  * Branches on the RAW (pre-roll) month/day rather than holiday identity,

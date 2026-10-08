@@ -13,7 +13,7 @@ export const DateRolls = {
 
   /**
    * Rolls Saturday to the previous Friday, Sunday to the following Monday.
-   * Used by US, CH calendars.
+   * Used by US calendars.
    */
   previousFridayOrFollowingMonday(): DateRoll {
     return (date: Temporal.PlainDate): Temporal.PlainDate => {
